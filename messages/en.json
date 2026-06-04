@@ -76,10 +76,24 @@
   },
   "budget": {
     "title": "Budget",
+    "subtitle": "Plan and track your monthly spending",
     "addBudget": "Add Budget",
+    "editBudget": "Edit Budget",
     "planned": "Planned",
     "actual": "Actual",
-    "remaining": "Remaining"
+    "remaining": "Remaining",
+    "spent": "Spent",
+    "over": "over budget",
+    "of": "of",
+    "nobudgets": "No budget set for this month",
+    "nobudgetsHint": "Add categories to start planning your spending",
+    "copyPreviousMonth": "Copy from last month",
+    "selectCategory": "Select category",
+    "category": "Category",
+    "allBudgeted": "All categories already have a budget this month.",
+    "totalPlanned": "Total Planned",
+    "totalSpent": "Total Spent",
+    "balance": "Balance"
   },
   "debts": {
     "title": "Debts",

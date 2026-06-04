@@ -76,10 +76,24 @@
   },
   "budget": {
     "title": "Presupuesto",
+    "subtitle": "Planifica y controla tus gastos mensuales",
     "addBudget": "Agregar Presupuesto",
+    "editBudget": "Editar Presupuesto",
     "planned": "Planificado",
     "actual": "Real",
-    "remaining": "Restante"
+    "remaining": "Restante",
+    "spent": "Gastado",
+    "over": "excedido",
+    "of": "de",
+    "nobudgets": "Sin presupuesto para este mes",
+    "nobudgetsHint": "Agrega categorías para empezar a planificar tus gastos",
+    "copyPreviousMonth": "Copiar del mes anterior",
+    "selectCategory": "Selecciona una categoría",
+    "category": "Categoría",
+    "allBudgeted": "Todas las categorías ya tienen presupuesto este mes.",
+    "totalPlanned": "Total Planificado",
+    "totalSpent": "Total Gastado",
+    "balance": "Balance"
   },
   "debts": {
     "title": "Deudas",
