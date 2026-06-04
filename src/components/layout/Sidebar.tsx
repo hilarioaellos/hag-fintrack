@@ -12,6 +12,7 @@ import {
   TrendingDown,
   CreditCard,
   BarChart3,
+  Scale,
   Settings,
   LogOut,
 } from "lucide-react";
@@ -24,6 +25,7 @@ const NAV_MAIN = [
   { href: "/debts", icon: TrendingDown, key: "debts" },
   { href: "/cards", icon: CreditCard, key: "cards" },
   { href: "/reports", icon: BarChart3, key: "reports" },
+  { href: "/reconciliation", icon: Scale, key: "reconciliation" },
 ] as const;
 
 function NavLink({

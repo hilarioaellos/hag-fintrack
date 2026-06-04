@@ -31,6 +31,7 @@
     "debts": "Debts",
     "cards": "Cards",
     "reports": "Reports",
+    "reconciliation": "Reconciliation",
     "settings": "Settings"
   },
   "dashboard": {
@@ -160,6 +161,28 @@
     "accounts": "accounts",
     "noData": "No data for this period",
     "last6Months": "Last 6 months"
+  },
+  "reconciliation": {
+    "title": "Reconciliation",
+    "subtitle": "Compare your records with bank statements",
+    "account": "Account",
+    "selectAccount": "Select an account to reconcile",
+    "bankBalance": "Bank Statement Balance",
+    "systemBalance": "System Balance",
+    "difference": "Difference",
+    "statementDate": "Statement Date",
+    "notes": "Notes",
+    "notesPlaceholder": "e.g. June bank statement",
+    "balanced": "Records match the bank statement",
+    "discrepancy": "Difference of {amount}",
+    "confirm": "Confirm Reconciliation",
+    "history": "Reconciliation History",
+    "noHistory": "No reconciliations yet for this account",
+    "status": {
+      "completed": "Balanced",
+      "discrepancy": "Discrepancy",
+      "pending": "Pending"
+    }
   },
   "settings": {
     "title": "Settings",

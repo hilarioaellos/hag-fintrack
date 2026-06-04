@@ -31,6 +31,7 @@
     "debts": "Deudas",
     "cards": "Tarjetas",
     "reports": "Reportes",
+    "reconciliation": "Conciliación",
     "settings": "Configuración"
   },
   "dashboard": {
@@ -160,6 +161,28 @@
     "accounts": "cuentas",
     "noData": "Sin datos para este período",
     "last6Months": "Últimos 6 meses"
+  },
+  "reconciliation": {
+    "title": "Conciliación",
+    "subtitle": "Compara tus registros con los estados de cuenta",
+    "account": "Cuenta",
+    "selectAccount": "Selecciona una cuenta para conciliar",
+    "bankBalance": "Saldo del Estado de Cuenta",
+    "systemBalance": "Saldo del Sistema",
+    "difference": "Diferencia",
+    "statementDate": "Fecha del Estado",
+    "notes": "Notas",
+    "notesPlaceholder": "Ej. Estado de junio",
+    "balanced": "Los registros coinciden con el estado de cuenta",
+    "discrepancy": "Diferencia de {amount}",
+    "confirm": "Confirmar Conciliación",
+    "history": "Historial de Conciliaciones",
+    "noHistory": "Sin conciliaciones para esta cuenta",
+    "status": {
+      "completed": "Cuadrado",
+      "discrepancy": "Discrepancia",
+      "pending": "Pendiente"
+    }
   },
   "settings": {
     "title": "Configuración",
