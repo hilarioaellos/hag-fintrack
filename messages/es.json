@@ -1,0 +1,137 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Agregar",
+    "back": "Regresar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "noData": "Sin datos",
+    "error": "Algo salió mal"
+  },
+  "auth": {
+    "signIn": "Iniciar Sesión",
+    "signingIn": "Iniciando sesión...",
+    "signOut": "Cerrar Sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "invalidCredentials": "Correo o contraseña incorrectos",
+    "subtitle": "Finanzas Personales"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "accounts": "Cuentas",
+    "transactions": "Transacciones",
+    "budget": "Presupuesto",
+    "debts": "Deudas",
+    "cards": "Tarjetas",
+    "reports": "Reportes",
+    "settings": "Configuración"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "netWorth": "Patrimonio Neto",
+    "monthlyIncome": "Ingresos del Mes",
+    "monthlyExpenses": "Gastos del Mes",
+    "cashFlow": "Flujo de Caja",
+    "recentTransactions": "Transacciones Recientes"
+  },
+  "accounts": {
+    "title": "Cuentas",
+    "subtitle": "Gestiona tus cuentas bancarias y sigue tus saldos",
+    "addAccount": "Agregar Cuenta",
+    "balance": "Saldo",
+    "type": {
+      "checking": "Cheques",
+      "savings": "Ahorros",
+      "investment": "Inversión",
+      "credit": "Crédito",
+      "cash": "Efectivo"
+    }
+  },
+  "transactions": {
+    "title": "Transacciones",
+    "subtitle": "Registra tus ingresos y gastos",
+    "addTransaction": "Agregar Transacción",
+    "editTransaction": "Editar Transacción",
+    "amount": "Monto",
+    "date": "Fecha",
+    "category": "Categoría",
+    "merchant": "Comercio",
+    "notes": "Notas",
+    "income": "Ingreso",
+    "expense": "Gasto",
+    "type": {
+      "income": "Ingreso",
+      "expense": "Gasto",
+      "transfer": "Transferencia"
+    },
+    "import": "Importar CSV",
+    "reconciled": "Conciliado"
+  },
+  "budget": {
+    "title": "Presupuesto",
+    "addBudget": "Agregar Presupuesto",
+    "planned": "Planificado",
+    "actual": "Real",
+    "remaining": "Restante"
+  },
+  "debts": {
+    "title": "Deudas",
+    "addDebt": "Agregar Deuda",
+    "balance": "Saldo",
+    "apr": "TAE",
+    "monthlyPayment": "Pago Mensual",
+    "lender": "Prestamista",
+    "type": {
+      "revolving": "Revolvente",
+      "installment": "A Plazos"
+    }
+  },
+  "cards": {
+    "title": "Tarjetas de Crédito",
+    "subtitle": "Sigue tus tarjetas y fechas de pago",
+    "addCard": "Agregar Tarjeta",
+    "editCard": "Editar Tarjeta",
+    "creditLimit": "Límite de Crédito",
+    "closingDay": "Día de Cierre",
+    "dueDay": "Día de Pago",
+    "minPayment": "Pago Mínimo",
+    "balance": "Saldo",
+    "utilization": "Utilización",
+    "account": "Cuenta",
+    "selectAccount": "Selecciona una cuenta de crédito",
+    "noCards": "Sin tarjetas de crédito",
+    "noCardsHint": "Vincula una cuenta de crédito para seguir fechas de pago y utilización",
+    "noCreditAccounts": "No se encontraron cuentas de crédito. Agrega una primero.",
+    "daysUntilDue": "{days} días para el pago",
+    "dueToday": "Vence hoy",
+    "closesOn": "Cierra el día {day}",
+    "dueOn": "Pago el día {day}"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todo leído",
+    "noNotifications": "Sin notificaciones nuevas"
+  },
+  "reports": {
+    "title": "Reportes",
+    "incomeVsExpenses": "Ingresos vs Gastos",
+    "byCategory": "Por Categoría",
+    "netWorthOverTime": "Patrimonio en el Tiempo",
+    "cashFlow": "Flujo de Caja"
+  },
+  "settings": {
+    "title": "Configuración",
+    "currency": "Moneda Predeterminada",
+    "language": "Idioma",
+    "theme": "Tema",
+    "dark": "Oscuro",
+    "light": "Claro"
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "confirm": "Confirm",
+    "close": "Close",
+    "search": "Search",
+    "filter": "Filter",
+    "noData": "No data",
+    "error": "Something went wrong"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signingIn": "Signing in...",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "invalidCredentials": "Invalid email or password",
+    "subtitle": "Personal Finance"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "accounts": "Accounts",
+    "transactions": "Transactions",
+    "budget": "Budget",
+    "debts": "Debts",
+    "cards": "Cards",
+    "reports": "Reports",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "netWorth": "Net Worth",
+    "monthlyIncome": "Monthly Income",
+    "monthlyExpenses": "Monthly Expenses",
+    "cashFlow": "Cash Flow",
+    "recentTransactions": "Recent Transactions"
+  },
+  "accounts": {
+    "title": "Accounts",
+    "subtitle": "Manage your bank accounts and track balances",
+    "addAccount": "Add Account",
+    "balance": "Balance",
+    "type": {
+      "checking": "Checking",
+      "savings": "Savings",
+      "investment": "Investment",
+      "credit": "Credit",
+      "cash": "Cash"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "subtitle": "Track your income and expenses",
+    "addTransaction": "Add Transaction",
+    "editTransaction": "Edit Transaction",
+    "amount": "Amount",
+    "date": "Date",
+    "category": "Category",
+    "merchant": "Merchant",
+    "notes": "Notes",
+    "income": "Income",
+    "expense": "Expense",
+    "type": {
+      "income": "Income",
+      "expense": "Expense",
+      "transfer": "Transfer"
+    },
+    "import": "Import CSV",
+    "reconciled": "Reconciled"
+  },
+  "budget": {
+    "title": "Budget",
+    "addBudget": "Add Budget",
+    "planned": "Planned",
+    "actual": "Actual",
+    "remaining": "Remaining"
+  },
+  "debts": {
+    "title": "Debts",
+    "addDebt": "Add Debt",
+    "balance": "Balance",
+    "apr": "APR",
+    "monthlyPayment": "Monthly Payment",
+    "lender": "Lender",
+    "type": {
+      "revolving": "Revolving",
+      "installment": "Installment"
+    }
+  },
+  "cards": {
+    "title": "Credit Cards",
+    "subtitle": "Track your credit cards and payment due dates",
+    "addCard": "Add Card",
+    "editCard": "Edit Card",
+    "creditLimit": "Credit Limit",
+    "closingDay": "Closing Day",
+    "dueDay": "Due Day",
+    "minPayment": "Min. Payment",
+    "balance": "Balance",
+    "utilization": "Utilization",
+    "account": "Account",
+    "selectAccount": "Select credit account",
+    "noCards": "No credit cards yet",
+    "noCardsHint": "Link a credit account to track due dates and utilization",
+    "noCreditAccounts": "No credit accounts found. Add a credit account first.",
+    "daysUntilDue": "{days} days until due",
+    "dueToday": "Due today",
+    "closesOn": "Closes on day {day}",
+    "dueOn": "Due on day {day}"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No new notifications"
+  },
+  "reports": {
+    "title": "Reports",
+    "incomeVsExpenses": "Income vs Expenses",
+    "byCategory": "By Category",
+    "netWorthOverTime": "Net Worth Over Time",
+    "cashFlow": "Cash Flow"
+  },
+  "settings": {
+    "title": "Settings",
+    "currency": "Default Currency",
+    "language": "Language",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light"
+  }
+}
