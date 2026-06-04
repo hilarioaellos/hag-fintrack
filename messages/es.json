@@ -97,15 +97,29 @@
   },
   "debts": {
     "title": "Deudas",
+    "subtitle": "Rastrea y planifica el pago de tus deudas",
     "addDebt": "Agregar Deuda",
+    "editDebt": "Editar Deuda",
     "balance": "Saldo",
     "apr": "TAE",
     "monthlyPayment": "Pago Mensual",
     "lender": "Prestamista",
+    "name": "Nombre de la Deuda",
     "type": {
       "revolving": "Revolvente",
       "installment": "A Plazos"
-    }
+    },
+    "noDebts": "Sin deudas activas",
+    "noDebtsHint": "Agrega una deuda para empezar a seguir tu progreso de pago",
+    "totalDebt": "Deuda Total",
+    "avalanche": "Avalancha",
+    "avalancheDesc": "Paga primero la mayor TAE — minimiza el interés total",
+    "snowball": "Bola de nieve",
+    "snowballDesc": "Paga primero el menor saldo — maximiza la motivación",
+    "payoffOrder": "Orden de pago sugerido",
+    "archive": "Archivar",
+    "debtType": "Tipo",
+    "currency": "Moneda"
   },
   "cards": {
     "title": "Tarjetas de Crédito",

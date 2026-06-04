@@ -97,15 +97,29 @@
   },
   "debts": {
     "title": "Debts",
+    "subtitle": "Track and plan your debt payoff",
     "addDebt": "Add Debt",
+    "editDebt": "Edit Debt",
     "balance": "Balance",
     "apr": "APR",
     "monthlyPayment": "Monthly Payment",
     "lender": "Lender",
+    "name": "Debt Name",
     "type": {
       "revolving": "Revolving",
       "installment": "Installment"
-    }
+    },
+    "noDebts": "No active debts",
+    "noDebtsHint": "Add a debt to start tracking your payoff progress",
+    "totalDebt": "Total Debt",
+    "avalanche": "Avalanche",
+    "avalancheDesc": "Pay highest APR first — minimizes total interest",
+    "snowball": "Snowball",
+    "snowballDesc": "Pay lowest balance first — maximizes motivation",
+    "payoffOrder": "Suggested payoff order",
+    "archive": "Archive",
+    "debtType": "Type",
+    "currency": "Currency"
   },
   "cards": {
     "title": "Credit Cards",
