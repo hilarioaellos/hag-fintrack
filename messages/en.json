@@ -135,10 +135,17 @@
   },
   "reports": {
     "title": "Reports",
+    "subtitle": "Analyze your financial data",
     "incomeVsExpenses": "Income vs Expenses",
-    "byCategory": "By Category",
-    "netWorthOverTime": "Net Worth Over Time",
-    "cashFlow": "Cash Flow"
+    "byCategory": "Expenses by Category",
+    "netWorthOverTime": "Net Worth",
+    "cashFlow": "Daily Cash Flow",
+    "income": "Income",
+    "expenses": "Expenses",
+    "netWorth": "Net Worth",
+    "accounts": "accounts",
+    "noData": "No data for this period",
+    "last6Months": "Last 6 months"
   },
   "settings": {
     "title": "Settings",

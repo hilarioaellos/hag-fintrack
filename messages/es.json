@@ -135,10 +135,17 @@
   },
   "reports": {
     "title": "Reportes",
+    "subtitle": "Analiza tus datos financieros",
     "incomeVsExpenses": "Ingresos vs Gastos",
-    "byCategory": "Por Categoría",
-    "netWorthOverTime": "Patrimonio en el Tiempo",
-    "cashFlow": "Flujo de Caja"
+    "byCategory": "Gastos por Categoría",
+    "netWorthOverTime": "Patrimonio Neto",
+    "cashFlow": "Flujo de Caja Diario",
+    "income": "Ingresos",
+    "expenses": "Gastos",
+    "netWorth": "Patrimonio Neto",
+    "accounts": "cuentas",
+    "noData": "Sin datos para este período",
+    "last6Months": "Últimos 6 meses"
   },
   "settings": {
     "title": "Configuración",
