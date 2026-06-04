@@ -186,10 +186,14 @@
   },
   "settings": {
     "title": "Configuración",
-    "currency": "Moneda Predeterminada",
-    "language": "Idioma",
+    "subtitle": "Administra tus preferencias y cuenta",
+    "preferences": "Preferencias",
+    "defaultCurrency": "Moneda Predeterminada",
     "theme": "Tema",
-    "dark": "Oscuro",
-    "light": "Claro"
+    "account": "Cuenta",
+    "version": "Versión",
+    "dataBackup": "Copia de Datos",
+    "saved": "¡Guardado!",
+    "automatic": "Automática"
   }
 }

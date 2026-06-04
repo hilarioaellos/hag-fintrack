@@ -9,7 +9,7 @@ import type { Doc } from "@convex-api/dataModel";
 export function NotificationBell() {
   const t = useTranslations("notifications");
   const notifications = useQuery(api.fintrack.notifications.listUnread);
-  const markAllRead = useMutation(api.fintrack.notifications.markAllRead);
+  const markAllAsRead = useMutation(api.fintrack.notifications.markAllAsRead);
   const [open, setOpen] = useState(false);
 
   const count = notifications?.length ?? 0;
@@ -52,7 +52,7 @@ export function NotificationBell() {
               </span>
               {count > 0 && (
                 <button
-                  onClick={() => { void markAllRead(); }}
+                  onClick={() => { void markAllAsRead(); }}
                   className="text-[10px] transition-opacity hover:opacity-70"
                   style={{ color: "var(--color-ft-primary)" }}
                 >

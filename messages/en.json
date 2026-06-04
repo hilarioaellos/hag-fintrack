@@ -186,10 +186,14 @@
   },
   "settings": {
     "title": "Settings",
-    "currency": "Default Currency",
-    "language": "Language",
+    "subtitle": "Manage your preferences and account",
+    "preferences": "Preferences",
+    "defaultCurrency": "Default Currency",
     "theme": "Theme",
-    "dark": "Dark",
-    "light": "Light"
+    "account": "Account",
+    "version": "Version",
+    "dataBackup": "Data Backup",
+    "saved": "Saved!",
+    "automatic": "Automatic"
   }
 }
