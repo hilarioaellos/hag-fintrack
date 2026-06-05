@@ -1,16 +1,21 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
+import coreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Exclude generated and non-app files from linting
+  {
+    ignores: ["scripts/**", "src/convex-generated/**"],
+  },
+  ...coreWebVitals,
+  ...nextTypescript,
+  // Disable React Compiler / purity rules — project does not use babel-plugin-react-compiler
+  {
+    rules: {
+      "react-compiler/react-compiler": "off",
+      "react-hooks/purity": "off",
+      "react-hooks/set-state-in-effect": "off",
+    },
+  },
 ];
 
 export default eslintConfig;

@@ -4,7 +4,7 @@ import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
 import { useRef, useState } from "react";
 import Papa from "papaparse";
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
