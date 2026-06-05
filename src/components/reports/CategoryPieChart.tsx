@@ -24,7 +24,9 @@ export function CategoryPieChart() {
   return (
     <div className="space-y-3">
       <MonthNav year={year} month={month} onChange={(y, m) => setPeriod({ year: y, month: m })} />
-      {!data || data.length === 0 ? (
+      {data === undefined ? (
+        <div className="animate-pulse rounded-lg h-[160px]" style={{ backgroundColor: "var(--color-ft-surface-2)" }} />
+      ) : data.length === 0 ? (
         <p className="text-sm py-8 text-center" style={{ color: "var(--color-ft-text-3)" }}>
           {t("noData")}
         </p>

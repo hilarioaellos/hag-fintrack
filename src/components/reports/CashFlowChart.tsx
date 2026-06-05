@@ -20,12 +20,14 @@ export function CashFlowChart() {
   const data = useQuery(api.fintrack.reports.cashFlowByDay, { year, month });
 
   type DayRow = { day: number; incomeCents: number; expenseCents: number };
-  const hasData = (data ?? []).some((d: DayRow) => d.incomeCents > 0 || d.expenseCents > 0);
+  const hasData = data !== undefined && data.some((d: DayRow) => d.incomeCents > 0 || d.expenseCents > 0);
 
   return (
     <div className="space-y-3">
       <MonthNav year={year} month={month} onChange={(y, m) => setPeriod({ year: y, month: m })} />
-      {!hasData ? (
+      {data === undefined ? (
+        <div className="animate-pulse rounded-lg h-[200px]" style={{ backgroundColor: "var(--color-ft-surface-2)" }} />
+      ) : !hasData ? (
         <p className="text-sm py-8 text-center" style={{ color: "var(--color-ft-text-3)" }}>
           {t("noData")}
         </p>
