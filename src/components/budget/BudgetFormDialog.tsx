@@ -38,7 +38,7 @@ const inputStyle = {
 export function BudgetFormDialog({ open, onOpenChange, year, month, budget, budgetedCategoryIds }: Props) {
   const t = useTranslations("budget");
   const tc = useTranslations("common");
-  const categories = useQuery(api.fintrack.categories.list);
+  const categories = useQuery(api.fintrack.categories.listActive);
   const createMutation = useMutation(api.fintrack.budgets.create);
   const updateMutation = useMutation(api.fintrack.budgets.update);
 

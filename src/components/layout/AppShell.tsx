@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import { MobileTabs } from "./MobileTabs";
+import { CategorySettingsInit } from "./CategorySettingsInit";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       className="flex h-screen overflow-hidden"
       style={{ backgroundColor: "var(--color-ft-bg)" }}
     >
+      <CategorySettingsInit />
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         <Topbar />

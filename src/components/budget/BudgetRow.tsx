@@ -40,17 +40,28 @@ export function BudgetRow({ budget, year, month, budgetedCategoryIds }: Props) {
   const isOver = remainingCents < 0;
   const color = progressColor(ratio);
 
+  const isSubcategory = !!category?.parentId;
+
   return (
     <>
       <div
         className="px-4 py-3 flex flex-col gap-2 group border-b last:border-0"
-        style={{ borderColor: "var(--color-ft-border)" }}
+        style={{
+          borderColor: "var(--color-ft-border)",
+          ...(isSubcategory && { paddingLeft: "2rem", borderLeft: "2px solid var(--color-ft-border)" }),
+        }}
       >
         {/* Top row */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
+            {isSubcategory && (
+              <span className="text-xs shrink-0" style={{ color: "var(--color-ft-text-3)" }}>↳</span>
+            )}
             <span className="text-lg shrink-0">{category?.icon ?? "📦"}</span>
-            <span className="text-sm font-medium truncate" style={{ color: "var(--color-ft-text)" }}>
+            <span
+              className="text-sm font-medium truncate"
+              style={{ color: isSubcategory ? "var(--color-ft-text-2)" : "var(--color-ft-text)" }}
+            >
               {category?.name ?? "Unknown"}
             </span>
           </div>

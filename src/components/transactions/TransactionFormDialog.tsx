@@ -49,7 +49,7 @@ export function TransactionFormDialog({
   const tc = useTranslations("common");
 
   const accounts = useQuery(api.fintrack.accounts.list);
-  const categories = useQuery(api.fintrack.categories.list);
+  const categories = useQuery(api.fintrack.categories.listActive);
   const seedCategories = useMutation(api.fintrack.categories.seed);
   const createMutation = useMutation(api.fintrack.transactions.create);
   const updateMutation = useMutation(api.fintrack.transactions.update);
@@ -76,7 +76,7 @@ export function TransactionFormDialog({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Seed categories once when dialog opens
+  // Seed categories once when dialog opens (initializeSettings runs at AppShell level)
   useEffect(() => {
     if (open && categories !== undefined && categories.length === 0) {
       seedCategories();

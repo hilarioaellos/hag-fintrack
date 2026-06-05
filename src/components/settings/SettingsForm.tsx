@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import type { Doc } from "@convex-api/dataModel";
 
 const inputStyle = {
   backgroundColor: "var(--color-ft-surface-2)",
@@ -30,6 +31,173 @@ const THEMES = [
   { value: "dark", label: "Dark" },
   { value: "system", label: "System" },
 ];
+
+type Category = Doc<"fintrack_categories">;
+
+function CategoryPreferences() {
+  const categories = useQuery(api.fintrack.categories.list);
+  const initSettings = useMutation(api.fintrack.categories.initializeSettings);
+  const updateSetting = useMutation(api.fintrack.categories.updateSetting);
+
+  // Pending local state: categoryId → { isActive, excludeFromReports }
+  const [pending, setPending] = useState<
+    Record<string, { isActive: boolean; excludeFromReports: boolean }>
+  >({});
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // Initialize settings once on mount so listActive works correctly
+  useEffect(() => {
+    initSettings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const toggle = (
+    cat: Category,
+    field: "isActive" | "excludeFromReports",
+    current: boolean
+  ) => {
+    if (cat.forceExclude) return;
+    setPending((prev) => ({
+      ...prev,
+      [cat._id]: {
+        isActive: field === "isActive" ? !current : (prev[cat._id]?.isActive ?? true),
+        excludeFromReports:
+          field === "excludeFromReports"
+            ? !current
+            : (prev[cat._id]?.excludeFromReports ?? false),
+      },
+    }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await Promise.all(
+        Object.entries(pending).map(([catId, vals]) =>
+          updateSetting({
+            categoryId: catId as Category["_id"],
+            isActive: vals.isActive,
+            excludeFromReports: vals.excludeFromReports,
+          })
+        )
+      );
+      setPending({});
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!categories) {
+    return (
+      <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+        Loading categories…
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+        Manage which categories appear in selectors and reports.
+        Categories marked with 🔒 are required by the system.
+      </p>
+
+      <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+        {/* Header row */}
+        <div className="grid grid-cols-[1fr_80px_80px] gap-2 px-2 pb-1 border-b"
+          style={{ borderColor: "var(--color-ft-border)" }}>
+          <span className="text-xs font-medium" style={{ color: "var(--color-ft-text-3)" }}>
+            Category
+          </span>
+          <span className="text-xs font-medium text-center" style={{ color: "var(--color-ft-text-3)" }}>
+            Active
+          </span>
+          <span className="text-xs font-medium text-center" style={{ color: "var(--color-ft-text-3)" }}>
+            In Reports
+          </span>
+        </div>
+
+        {categories.map((cat: Category) => {
+          const localState = pending[cat._id];
+          const isActive = localState?.isActive ?? true;
+          const excludeFromReports = localState?.excludeFromReports ?? false;
+          const locked = !!cat.forceExclude;
+
+          return (
+            <div
+              key={cat._id}
+              className="grid grid-cols-[1fr_80px_80px] gap-2 items-center px-2 py-1 rounded-lg"
+              style={{ backgroundColor: "var(--color-ft-surface-2)" }}
+            >
+              <span className="text-sm flex items-center gap-1.5" style={{ color: "var(--color-ft-text)" }}>
+                {cat.icon && <span>{cat.icon}</span>}
+                {cat.name}
+                {locked && <span title="System required" className="text-xs">🔒</span>}
+              </span>
+
+              {/* Active toggle */}
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  disabled={locked}
+                  onClick={() => toggle(cat, "isActive", isActive)}
+                  className="w-8 h-4 rounded-full transition-colors disabled:opacity-40"
+                  style={{
+                    backgroundColor: isActive
+                      ? "var(--color-ft-good)"
+                      : "var(--color-ft-surface)",
+                    border: "1px solid var(--color-ft-border)",
+                  }}
+                  aria-label={isActive ? "Active" : "Inactive"}
+                >
+                  <span
+                    className="block w-3 h-3 rounded-full bg-white transition-transform mx-0.5"
+                    style={{ transform: isActive ? "translateX(16px)" : "translateX(0)" }}
+                  />
+                </button>
+              </div>
+
+              {/* Exclude from reports toggle */}
+              <div className="flex justify-center">
+                <button
+                  type="button"
+                  disabled={locked}
+                  onClick={() => toggle(cat, "excludeFromReports", excludeFromReports)}
+                  className="w-8 h-4 rounded-full transition-colors disabled:opacity-40"
+                  style={{
+                    backgroundColor: !excludeFromReports
+                      ? "var(--color-ft-good)"
+                      : "var(--color-ft-bad)",
+                    border: "1px solid var(--color-ft-border)",
+                  }}
+                  aria-label={excludeFromReports ? "Excluded from reports" : "Included in reports"}
+                >
+                  <span
+                    className="block w-3 h-3 rounded-full bg-white transition-transform mx-0.5"
+                    style={{ transform: !excludeFromReports ? "translateX(16px)" : "translateX(0)" }}
+                  />
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <Button
+        onClick={handleSave}
+        disabled={saving || Object.keys(pending).length === 0}
+        size="sm"
+        className="w-full"
+        style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18" }}
+      >
+        {saving ? "Saving…" : saved ? "Saved!" : "Save category preferences"}
+      </Button>
+    </div>
+  );
+}
 
 export function SettingsForm() {
   const t = useTranslations("settings");
@@ -115,6 +283,17 @@ export function SettingsForm() {
         >
           {saving ? tc("loading") : saved ? t("saved") : tc("save")}
         </Button>
+      </div>
+
+      {/* Category Preferences Card */}
+      <div
+        className="rounded-xl border p-5 space-y-4"
+        style={{ backgroundColor: "var(--color-ft-surface)", borderColor: "var(--color-ft-border)" }}
+      >
+        <p className="text-sm font-semibold" style={{ color: "var(--color-ft-text)" }}>
+          Category Preferences
+        </p>
+        <CategoryPreferences />
       </div>
 
       {/* Info Card */}
