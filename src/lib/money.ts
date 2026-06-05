@@ -7,5 +7,10 @@ export const dollarsToCents = (d: number): number => {
   return result;
 };
 
-export const formatMoney = (cents: number, currency = "USD") =>
-  new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+export const formatMoney = (cents: number, currency = "USD") => {
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(cents / 100);
+  } catch {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
+  }
+};
