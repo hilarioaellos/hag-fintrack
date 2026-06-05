@@ -76,6 +76,19 @@ export function AccountFormDialog({ open, onOpenChange, account }: Props) {
     e.preventDefault();
     setError("");
     if (!name.trim()) { setError("Name is required"); return; }
+    if (!isEdit) {
+      const normalized = currency.toUpperCase().trim();
+      if (!/^[A-Z]{3}$/.test(normalized)) {
+        setError("Currency must be a 3-letter ISO code (e.g. USD, MXN, EUR)");
+        return;
+      }
+      try {
+        new Intl.NumberFormat("en-US", { style: "currency", currency: normalized });
+      } catch {
+        setError(`"${normalized}" is not a valid currency code`);
+        return;
+      }
+    }
     setLoading(true);
     try {
       if (isEdit) {
@@ -89,7 +102,7 @@ export function AccountFormDialog({ open, onOpenChange, account }: Props) {
         await createMutation({
           name: name.trim(),
           type,
-          currencyCode: currency.toUpperCase().trim() || "USD",
+          currencyCode: currency.toUpperCase().trim(),
           bankName: bankName.trim() || undefined,
           initialBalanceCents: balanceCents,
         });
