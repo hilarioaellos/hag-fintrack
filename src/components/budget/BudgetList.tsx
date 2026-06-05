@@ -4,11 +4,12 @@ import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Plus, Copy } from "lucide-react";
+import { Plus, Copy, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MonthNav } from "./MonthNav";
 import { BudgetRow } from "./BudgetRow";
 import { BudgetFormDialog } from "./BudgetFormDialog";
+import { HistoryEstimateDialog } from "./HistoryEstimateDialog";
 import type { Doc } from "@convex-api/dataModel";
 
 type Budget = Doc<"fintrack_budgets"> & {
@@ -27,6 +28,7 @@ export function BudgetList() {
 
   const [{ year, month }, setPeriod] = useState(currentYearMonth);
   const [addOpen, setAddOpen] = useState(false);
+  const [estimateOpen, setEstimateOpen] = useState(false);
   const [copying, setCopying] = useState(false);
 
   const budgets = useQuery(api.fintrack.budgets.listWithActuals, { year, month });
@@ -56,6 +58,15 @@ export function BudgetList() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <MonthNav year={year} month={month} onChange={(y, m) => setPeriod({ year: y, month: m })} />
         <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setEstimateOpen(true)}
+            style={{ borderColor: "var(--color-ft-border)", color: "var(--color-ft-text-2)" }}
+          >
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            {t("estimateFromHistory")}
+          </Button>
           <Button
             size="sm"
             variant="outline"
@@ -140,6 +151,13 @@ export function BudgetList() {
       <BudgetFormDialog
         open={addOpen}
         onOpenChange={setAddOpen}
+        year={year}
+        month={month}
+        budgetedCategoryIds={budgetedCategoryIds}
+      />
+      <HistoryEstimateDialog
+        open={estimateOpen}
+        onOpenChange={setEstimateOpen}
         year={year}
         month={month}
         budgetedCategoryIds={budgetedCategoryIds}
