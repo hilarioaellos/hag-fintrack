@@ -1,5 +1,5 @@
-import { getTranslations } from "next-intl/server";
 import { DebtsList } from "@/components/debts/DebtsList";
+import { getTranslations } from "next-intl/server";
 
 export default async function DebtsPage() {
   const t = await getTranslations("debts");

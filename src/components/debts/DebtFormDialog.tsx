@@ -17,6 +17,7 @@ import type { Doc } from "@convex-api/dataModel";
 
 type Debt = Doc<"fintrack_debts">;
 type DebtType = Debt["type"];
+type Periodicity = "monthly" | "biweekly" | "weekly" | "one_time";
 
 interface Props {
   open: boolean;
@@ -29,6 +30,11 @@ const inputStyle = {
   borderColor: "var(--color-ft-border)",
   color: "var(--color-ft-text)",
 };
+
+function tsToDateInput(ts?: number): string {
+  if (!ts) return "";
+  return new Date(ts).toISOString().slice(0, 10);
+}
 
 export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
   const t = useTranslations("debts");
@@ -45,8 +51,17 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
   const [balance, setBalance] = useState(debt ? String(debt.balanceCents / 100) : "");
   const [apr, setApr] = useState(debt ? String(debt.interestRateBps / 100) : "");
   const [monthly, setMonthly] = useState(debt ? String(debt.monthlyPaymentCents / 100) : "");
+  // A7 fields
+  const [originDate, setOriginDate] = useState(tsToDateInput(debt?.originDate));
+  const [paymentDueDate, setPaymentDueDate] = useState(debt?.paymentDueDate ? String(debt.paymentDueDate) : "");
+  const [periodicity, setPeriodicity] = useState<Periodicity | "none">(debt?.paymentPeriodicity ?? "none");
+  const [totalTermMonths, setTotalTermMonths] = useState(debt?.totalTermMonths ? String(debt.totalTermMonths) : "");
+  const [paidInstallments, setPaidInstallments] = useState(debt?.paidInstallments ? String(debt.paidInstallments) : "");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const currentType = isEdit ? debt.type : type;
 
   const reset = () => {
     setName(debt?.name ?? "");
@@ -56,6 +71,11 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
     setBalance(debt ? String(debt.balanceCents / 100) : "");
     setApr(debt ? String(debt.interestRateBps / 100) : "");
     setMonthly(debt ? String(debt.monthlyPaymentCents / 100) : "");
+    setOriginDate(tsToDateInput(debt?.originDate));
+    setPaymentDueDate(debt?.paymentDueDate ? String(debt.paymentDueDate) : "");
+    setPeriodicity(debt?.paymentPeriodicity ?? "none");
+    setTotalTermMonths(debt?.totalTermMonths ? String(debt.totalTermMonths) : "");
+    setPaidInstallments(debt?.paidInstallments ? String(debt.paidInstallments) : "");
     setError("");
   };
 
@@ -79,6 +99,32 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
     if (aprFloat < 0 || aprFloat > 1000) { setError("APR must be between 0% and 1000%"); return; }
     if (monthlyPaymentCents <= 0) { setError("Monthly payment must be greater than 0"); return; }
 
+    const paymentDueDateNum = paymentDueDate !== "" ? Number(paymentDueDate) : undefined;
+    if (paymentDueDateNum !== undefined && (!Number.isInteger(paymentDueDateNum) || isNaN(paymentDueDateNum) || paymentDueDateNum < 1 || paymentDueDateNum > 31)) {
+      setError("Payment due day must be a whole number between 1 and 31"); return;
+    }
+    const totalTermNum = totalTermMonths !== "" ? Number(totalTermMonths) : undefined;
+    const paidNum = paidInstallments !== "" ? Number(paidInstallments) : undefined;
+    if (totalTermNum !== undefined && (!Number.isInteger(totalTermNum) || isNaN(totalTermNum) || totalTermNum < 1)) {
+      setError("Total term must be a whole number of at least 1"); return;
+    }
+    if (paidNum !== undefined && (!Number.isInteger(paidNum) || isNaN(paidNum) || paidNum < 0)) {
+      setError("Paid installments must be a whole non-negative number"); return;
+    }
+    if (paidNum !== undefined && totalTermNum !== undefined && paidNum > totalTermNum) {
+      setError("Paid installments cannot exceed total term"); return;
+    }
+
+    // Para deudas revolving, no enviar campos exclusivos de installment
+    const isInstallment = currentType === "installment";
+    const a7 = {
+      originDate: originDate ? new Date(originDate).getTime() : undefined,
+      paymentDueDate: paymentDueDateNum,
+      paymentPeriodicity: periodicity !== "none" ? (periodicity as Periodicity) : undefined,
+      totalTermMonths: isInstallment ? totalTermNum : undefined,
+      paidInstallments: isInstallment ? paidNum : undefined,
+    };
+
     setLoading(true);
     try {
       if (isEdit) {
@@ -90,6 +136,7 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
           balanceCents,
           interestRateBps,
           monthlyPaymentCents,
+          ...a7,
         });
       } else {
         await createMutation({
@@ -100,6 +147,7 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
           balanceCents,
           interestRateBps,
           monthlyPaymentCents,
+          ...a7,
         });
       }
       handleOpenChange(false);
@@ -120,6 +168,7 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+          {/* Name + Lender */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label style={{ color: "var(--color-ft-text-2)" }}>{t("name")}</Label>
@@ -133,6 +182,7 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
             </div>
           </div>
 
+          {/* Type (create only) */}
           {!isEdit && (
             <div className="space-y-1.5">
               <Label style={{ color: "var(--color-ft-text-2)" }}>{t("debtType")}</Label>
@@ -151,16 +201,11 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
           {/* Currency */}
           <div className="space-y-1.5">
             <Label style={{ color: "var(--color-ft-text-2)" }}>{t("currency")}</Label>
-            <Input
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value)}
-              placeholder="USD"
-              maxLength={3}
-              className="uppercase"
-              style={inputStyle}
-            />
+            <Input value={currency} onChange={(e) => setCurrency(e.target.value)}
+              placeholder="USD" maxLength={3} className="uppercase" style={inputStyle} />
           </div>
 
+          {/* Balance + APR + Monthly */}
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <Label style={{ color: "var(--color-ft-text-2)" }}>{t("balance")}</Label>
@@ -178,6 +223,57 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
                 onChange={(e) => setMonthly(e.target.value)} placeholder="0.00" style={inputStyle} />
             </div>
           </div>
+
+          {/* A7: Origin Date + Due Day */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label style={{ color: "var(--color-ft-text-2)" }}>{t("originDate")}</Label>
+              <Input type="date" value={originDate} onChange={(e) => setOriginDate(e.target.value)} style={inputStyle} />
+            </div>
+            <div className="space-y-1.5">
+              <Label style={{ color: "var(--color-ft-text-2)" }}>
+                {t("paymentDueDate")}
+                <span className="ml-1 text-[10px]" style={{ color: "var(--color-ft-text-3)" }}>
+                  {t("paymentDueDateHint")}
+                </span>
+              </Label>
+              <Input type="number" min="1" max="31" step="1" value={paymentDueDate}
+                onChange={(e) => setPaymentDueDate(e.target.value)} placeholder="15" style={inputStyle} />
+            </div>
+          </div>
+
+          {/* A7: Periodicity */}
+          <div className="space-y-1.5">
+            <Label style={{ color: "var(--color-ft-text-2)" }}>{t("periodicity")}</Label>
+            <Select value={periodicity} onValueChange={(v) => setPeriodicity(v as Periodicity | "none")}>
+              <SelectTrigger className="w-full" style={inputStyle}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">—</SelectItem>
+                <SelectItem value="monthly">{t("periodicity_monthly")}</SelectItem>
+                <SelectItem value="biweekly">{t("periodicity_biweekly")}</SelectItem>
+                <SelectItem value="weekly">{t("periodicity_weekly")}</SelectItem>
+                <SelectItem value="one_time">{t("periodicity_one_time")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* A7: Term + Progress — installment only */}
+          {currentType === "installment" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label style={{ color: "var(--color-ft-text-2)" }}>{t("totalTermMonths")}</Label>
+                <Input type="number" min="1" step="1" value={totalTermMonths}
+                  onChange={(e) => setTotalTermMonths(e.target.value)} placeholder="36" style={inputStyle} />
+              </div>
+              <div className="space-y-1.5">
+                <Label style={{ color: "var(--color-ft-text-2)" }}>{t("paidInstallments")}</Label>
+                <Input type="number" min="0" step="1" value={paidInstallments}
+                  onChange={(e) => setPaidInstallments(e.target.value)} placeholder="0" style={inputStyle} />
+              </div>
+            </div>
+          )}
 
           {error && <p className="text-sm" style={{ color: "var(--color-ft-bad)" }}>{error}</p>}
 

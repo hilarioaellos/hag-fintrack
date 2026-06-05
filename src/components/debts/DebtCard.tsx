@@ -4,9 +4,10 @@ import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { MoreHorizontal, Pencil, Archive } from "lucide-react";
+import { MoreHorizontal, Pencil, Archive, ChevronDown, ChevronUp } from "lucide-react";
 import type { Doc } from "@convex-api/dataModel";
 import { DebtFormDialog } from "./DebtFormDialog";
+import { AmortizationTable } from "./AmortizationTable";
 
 type Debt = Doc<"fintrack_debts">;
 
@@ -16,8 +17,24 @@ export function DebtCard({ debt }: { debt: Debt }) {
   const archiveMutation = useMutation(api.fintrack.debts.archive);
   const [editOpen, setEditOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showAmortization, setShowAmortization] = useState(false);
 
   const aprDisplay = (debt.interestRateBps / 100).toFixed(2) + "%";
+
+  const hasProgress =
+    debt.type === "installment" &&
+    debt.totalTermMonths != null &&
+    debt.totalTermMonths > 0;
+  const paidPct = hasProgress
+    ? Math.min(100, Math.round(((debt.paidInstallments ?? 0) / debt.totalTermMonths!) * 100))
+    : 0;
+  const remaining = hasProgress
+    ? debt.totalTermMonths! - (debt.paidInstallments ?? 0)
+    : null;
+
+  const periodicityKey = debt.paymentPeriodicity
+    ? (`periodicity_${debt.paymentPeriodicity}` as const)
+    : null;
 
   return (
     <>
@@ -92,7 +109,30 @@ export function DebtCard({ debt }: { debt: Debt }) {
           </p>
         </div>
 
-        {/* APR + Monthly */}
+        {/* Progress bar — installment only */}
+        {hasProgress && (
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-[10px]" style={{ color: "var(--color-ft-text-3)" }}>
+                {t("progress")} — {debt.paidInstallments ?? 0}/{debt.totalTermMonths} {t("paidLabel")}
+              </span>
+              <span className="text-[10px] font-mono" style={{ color: "var(--color-ft-text-3)" }}>
+                {remaining} {t("remainingInstallments")}
+              </span>
+            </div>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--color-ft-surface-2)" }}>
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${paidPct}%`,
+                  backgroundColor: paidPct >= 100 ? "var(--color-ft-good)" : "var(--color-ft-primary)",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* APR + Monthly + extra badges */}
         <div className="grid grid-cols-2 gap-4 pt-1 border-t" style={{ borderColor: "var(--color-ft-border)" }}>
           <div>
             <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>{t("apr")}</p>
@@ -107,6 +147,51 @@ export function DebtCard({ debt }: { debt: Debt }) {
             </p>
           </div>
         </div>
+
+        {/* Due day + Periodicity */}
+        {(debt.paymentDueDate != null || periodicityKey) && (
+          <div className="flex flex-wrap gap-2 pt-0.5">
+            {debt.paymentDueDate != null && (
+              <span
+                className="text-[10px] px-2 py-0.5 rounded-full border"
+                style={{ color: "var(--color-ft-text-3)", borderColor: "var(--color-ft-border)" }}
+              >
+                {t("paymentDueDate")}: {debt.paymentDueDate}
+              </span>
+            )}
+            {periodicityKey && (
+              <span
+                className="text-[10px] px-2 py-0.5 rounded-full border"
+                style={{ color: "var(--color-ft-text-3)", borderColor: "var(--color-ft-border)" }}
+              >
+                {t(periodicityKey)}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Amortization toggle — installment only */}
+        {debt.type === "installment" && (
+          <button
+            onClick={() => setShowAmortization((s) => !s)}
+            className="flex items-center gap-1.5 text-[11px] w-fit"
+            style={{ color: "var(--color-ft-primary)" }}
+          >
+            {showAmortization ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+            {t("amortization")}
+          </button>
+        )}
+
+        {showAmortization && (
+          <AmortizationTable
+            balanceCents={debt.balanceCents}
+            interestRateBps={debt.interestRateBps}
+            monthlyPaymentCents={debt.monthlyPaymentCents}
+            currencyCode={debt.currencyCode}
+            paidInstallments={debt.paidInstallments}
+            totalTermMonths={debt.totalTermMonths}
+          />
+        )}
       </div>
 
       <DebtFormDialog open={editOpen} onOpenChange={setEditOpen} debt={debt} />
