@@ -77,7 +77,15 @@
       "transfer": "Transfer"
     },
     "import": "Import CSV",
-    "reconciled": "Reconciled"
+    "reconciled": "Reconciled",
+    "sharedExpense": "Split this expense with someone",
+    "sharedDebtor": "Who owes you",
+    "sharedDebtorPlaceholder": "Person's name",
+    "sharedAmount": "Their share",
+    "sharedAmountHint": "Amount they owe — a receivable will be created automatically",
+    "sharedDebtorRequired": "Enter the name of who owes you",
+    "sharedAmountInvalid": "Enter a valid shared amount",
+    "sharedAmountTooLarge": "Their share must be less than the total expense"
   },
   "budget": {
     "title": "Budget",

@@ -77,7 +77,15 @@
       "transfer": "Transferencia"
     },
     "import": "Importar CSV",
-    "reconciled": "Conciliado"
+    "reconciled": "Conciliado",
+    "sharedExpense": "Dividir este gasto con alguien",
+    "sharedDebtor": "Quién te debe",
+    "sharedDebtorPlaceholder": "Nombre de la persona",
+    "sharedAmount": "Su parte",
+    "sharedAmountHint": "Monto que te deben — se creará una acreencia automáticamente",
+    "sharedDebtorRequired": "Ingresa el nombre de quien te debe",
+    "sharedAmountInvalid": "Ingresa un monto válido",
+    "sharedAmountTooLarge": "La parte del otro debe ser menor al gasto total"
   },
   "budget": {
     "title": "Presupuesto",

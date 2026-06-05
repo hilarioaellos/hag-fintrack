@@ -52,6 +52,7 @@ export function TransactionFormDialog({
   const categories = useQuery(api.fintrack.categories.listActive);
   const seedCategories = useMutation(api.fintrack.categories.seed);
   const createMutation = useMutation(api.fintrack.transactions.create);
+  const createSharedMutation = useMutation(api.fintrack.transactions.createShared);
   const updateMutation = useMutation(api.fintrack.transactions.update);
 
   const isEdit = !!transaction;
@@ -73,6 +74,9 @@ export function TransactionFormDialog({
     transaction ? new Date(transaction.date).toISOString().slice(0, 10) : todayISO
   );
   const [notes, setNotes] = useState(transaction?.notes ?? "");
+  const [isShared, setIsShared] = useState(false);
+  const [sharedAmount, setSharedAmount] = useState("");
+  const [debtorName, setDebtorName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -91,6 +95,9 @@ export function TransactionFormDialog({
     setCategoryId(transaction?.categoryId ?? "");
     setDate(transaction ? new Date(transaction.date).toISOString().slice(0, 10) : todayISO);
     setNotes(transaction?.notes ?? "");
+    setIsShared(false);
+    setSharedAmount("");
+    setDebtorName("");
     setError("");
   };
 
@@ -107,7 +114,17 @@ export function TransactionFormDialog({
     if (type === "transfer" && toAccountId === accountId) { setError("Origin and destination must be different"); return; }
     if (!amount || parseFloat(amount) <= 0) { setError("Enter a valid amount"); return; }
 
-    const amountCents = dollarsToCents(parseFloat(amount));
+    const amountNum = Number(amount);
+    if (!Number.isFinite(amountNum) || amountNum <= 0) { setError("Enter a valid amount"); return; }
+
+    if (!isEdit && isShared && type === "expense") {
+      if (!debtorName.trim()) { setError(t("sharedDebtorRequired")); return; }
+      const sharedNum = Number(sharedAmount);
+      if (!Number.isFinite(sharedNum) || sharedNum <= 0) { setError(t("sharedAmountInvalid")); return; }
+      if (sharedNum >= amountNum) { setError(t("sharedAmountTooLarge")); return; }
+    }
+
+    const amountCents = dollarsToCents(amountNum);
     const dateTs = new Date(date + "T12:00:00").getTime();
 
     setLoading(true);
@@ -123,6 +140,16 @@ export function TransactionFormDialog({
             : undefined,
           date: dateTs,
           notes: notes.trim() || undefined,
+        });
+      } else if (isShared && type === "expense") {
+        await createSharedMutation({
+          accountId: accountId as Doc<"fintrack_accounts">["_id"],
+          amountCents,
+          categoryId: categoryId as Doc<"fintrack_categories">["_id"] | undefined || undefined,
+          date: dateTs,
+          notes: notes.trim() || undefined,
+          sharedAmountCents: dollarsToCents(Number(sharedAmount)),
+          debtorName: debtorName.trim(),
         });
       } else {
         const selectedAccount = accounts?.find((a: Doc<"fintrack_accounts">) => a._id === accountId);
@@ -297,6 +324,54 @@ export function TransactionFormDialog({
               style={inputStyle}
             />
           </div>
+
+          {/* Shared expense toggle — only for new expenses */}
+          {!isEdit && type === "expense" && (
+            <div
+              className="rounded-lg border p-3 space-y-3"
+              style={{ borderColor: "var(--color-ft-border)", backgroundColor: isShared ? "color-mix(in srgb, var(--color-ft-primary) 5%, transparent)" : "transparent" }}
+            >
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isShared}
+                  onChange={(e) => setIsShared(e.target.checked)}
+                  className="accent-[var(--color-ft-primary)]"
+                />
+                <span className="text-sm font-medium" style={{ color: "var(--color-ft-text-2)" }}>
+                  {t("sharedExpense")}
+                </span>
+              </label>
+              {isShared && (
+                <div className="space-y-3 pt-1">
+                  <div className="space-y-1.5">
+                    <Label style={{ color: "var(--color-ft-text-2)" }}>{t("sharedDebtor")}</Label>
+                    <Input
+                      value={debtorName}
+                      onChange={(e) => setDebtorName(e.target.value)}
+                      placeholder={t("sharedDebtorPlaceholder")}
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label style={{ color: "var(--color-ft-text-2)" }}>{t("sharedAmount")}</Label>
+                    <Input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={sharedAmount}
+                      onChange={(e) => setSharedAmount(e.target.value)}
+                      placeholder="0.00"
+                      style={inputStyle}
+                    />
+                    <p className="text-[11px]" style={{ color: "var(--color-ft-text-3)" }}>
+                      {t("sharedAmountHint")}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {error && (
             <p className="text-sm" style={{ color: "var(--color-ft-bad)" }}>
