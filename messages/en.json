@@ -170,7 +170,16 @@
     "periodicity_weekly": "Weekly",
     "periodicity_one_time": "One-time",
     "amortizationInsufficientPayment": "Monthly payment does not cover interest — amortization table unavailable.",
-    "snowballMixedCurrencyWarning": "Your debts are in different currencies. Without exchange rates, snowball order is based on raw amounts and may not reflect the true smallest balance."
+    "snowballMixedCurrencyWarning": "Your debts are in different currencies. Without exchange rates, snowball order is based on raw amounts and may not reflect the true smallest balance.",
+    "errorNameRequired": "Name is required",
+    "errorLenderRequired": "Lender is required",
+    "errorBalanceRequired": "Balance must be greater than 0",
+    "errorAprRange": "APR must be between 0% and 1000%",
+    "errorMonthlyRequired": "Monthly payment must be greater than 0",
+    "errorPaymentDueDayRange": "Payment due day must be a whole number between 1 and 31",
+    "errorTotalTermMin": "Total term must be a whole number of at least 1",
+    "errorPaidInstallmentsNonNegative": "Paid installments must be a whole non-negative number",
+    "errorPaidExceedsTerm": "Paid installments cannot exceed total term"
   },
   "receivables": {
     "title": "Receivables",

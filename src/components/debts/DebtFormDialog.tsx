@@ -93,26 +93,26 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
     const interestRateBps = Math.round(aprFloat * 100);
     const monthlyPaymentCents = dollarsToCents(parseFloat(monthly) || 0);
 
-    if (!name.trim()) { setError("Name is required"); return; }
-    if (!lender.trim()) { setError("Lender is required"); return; }
-    if (balanceCents <= 0) { setError("Balance must be greater than 0"); return; }
-    if (aprFloat < 0 || aprFloat > 1000) { setError("APR must be between 0% and 1000%"); return; }
-    if (monthlyPaymentCents <= 0) { setError("Monthly payment must be greater than 0"); return; }
+    if (!name.trim()) { setError(t("errorNameRequired")); return; }
+    if (!lender.trim()) { setError(t("errorLenderRequired")); return; }
+    if (balanceCents <= 0) { setError(t("errorBalanceRequired")); return; }
+    if (aprFloat < 0 || aprFloat > 1000) { setError(t("errorAprRange")); return; }
+    if (monthlyPaymentCents <= 0) { setError(t("errorMonthlyRequired")); return; }
 
     const paymentDueDateNum = paymentDueDate !== "" ? Number(paymentDueDate) : undefined;
     if (paymentDueDateNum !== undefined && (!Number.isInteger(paymentDueDateNum) || isNaN(paymentDueDateNum) || paymentDueDateNum < 1 || paymentDueDateNum > 31)) {
-      setError("Payment due day must be a whole number between 1 and 31"); return;
+      setError(t("errorPaymentDueDayRange")); return;
     }
     const totalTermNum = totalTermMonths !== "" ? Number(totalTermMonths) : undefined;
     const paidNum = paidInstallments !== "" ? Number(paidInstallments) : undefined;
     if (totalTermNum !== undefined && (!Number.isInteger(totalTermNum) || isNaN(totalTermNum) || totalTermNum < 1)) {
-      setError("Total term must be a whole number of at least 1"); return;
+      setError(t("errorTotalTermMin")); return;
     }
     if (paidNum !== undefined && (!Number.isInteger(paidNum) || isNaN(paidNum) || paidNum < 0)) {
-      setError("Paid installments must be a whole non-negative number"); return;
+      setError(t("errorPaidInstallmentsNonNegative")); return;
     }
     if (paidNum !== undefined && totalTermNum !== undefined && paidNum > totalTermNum) {
-      setError("Paid installments cannot exceed total term"); return;
+      setError(t("errorPaidExceedsTerm")); return;
     }
 
     // Para deudas revolving, no enviar campos exclusivos de installment
