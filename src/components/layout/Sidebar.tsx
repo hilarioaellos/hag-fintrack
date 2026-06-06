@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -62,7 +62,6 @@ function NavLink({
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const { signOut } = useAuthActions();
   const t = useTranslations("nav");
 
@@ -71,7 +70,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/sign-in");
+    window.location.href = "/sign-in";
   };
 
   return (
