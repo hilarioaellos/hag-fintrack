@@ -13,10 +13,10 @@ function currentYearMonth() {
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
 }
 
-export function CategoryPieChart() {
+export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
   const [{ year, month }, setPeriod] = useState(currentYearMonth);
-  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month });
+  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode });
 
   type CatRow = { categoryId: string; name: string; icon: string; color: string; totalCents: number };
   const total = (data ?? []).reduce((s: number, d: CatRow) => s + d.totalCents, 0);

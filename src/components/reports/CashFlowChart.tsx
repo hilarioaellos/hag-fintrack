@@ -14,10 +14,10 @@ function currentYearMonth() {
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
 }
 
-export function CashFlowChart() {
+export function CashFlowChart({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
   const [{ year, month }, setPeriod] = useState(currentYearMonth);
-  const data = useQuery(api.fintrack.reports.cashFlowByDay, { year, month });
+  const data = useQuery(api.fintrack.reports.cashFlowByDay, { year, month, currencyCode });
 
   type DayRow = { day: number; incomeCents: number; expenseCents: number };
   const hasData = data !== undefined && data.some((d: DayRow) => d.incomeCents > 0 || d.expenseCents > 0);

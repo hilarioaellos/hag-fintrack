@@ -13,10 +13,10 @@ function formatK(cents: number): string {
   return `$${dollars.toFixed(0)}`;
 }
 
-export function IncomeExpensesChart() {
+export function IncomeExpensesChart({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
   const locale = useLocale();
-  const data = useQuery(api.fintrack.reports.incomeVsExpenses, { months: 6 });
+  const data = useQuery(api.fintrack.reports.incomeVsExpenses, { months: 6, currencyCode });
 
   type Row = { year: number; month: number; income: number; expenses: number };
   const formatted = (data ?? []).map((d: Row) => ({

@@ -4,10 +4,12 @@ export function StatCard({
   label,
   valueCents,
   color,
+  currency = "USD",
 }: {
   label: string;
   valueCents: number;
   color: string;
+  currency?: string;
 }) {
   return (
     <div
@@ -24,7 +26,7 @@ export function StatCard({
         {label}
       </p>
       <p className="mt-2 text-2xl font-bold ft-num" style={{ color }}>
-        {formatMoney(valueCents)}
+        {formatMoney(valueCents, currency)}
       </p>
       <div
         className="mt-3 h-0.5 w-8 rounded-full"

@@ -4,16 +4,13 @@ import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
 
-export function NetWorthCard() {
+export function NetWorthCard({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
-  const tc = useTranslations("common");
-  const data = useQuery(api.fintrack.reports.netWorthSnapshot);
+  const data = useQuery(api.fintrack.reports.netWorthSnapshot, { currencyCode });
 
   if (!data) {
     return (
-      <p className="text-sm py-4" style={{ color: "var(--color-ft-text-3)" }}>
-        {tc("loading")}
-      </p>
+      <div className="animate-pulse rounded-lg h-16" style={{ backgroundColor: "var(--color-ft-surface-2)" }} />
     );
   }
 
@@ -25,7 +22,7 @@ export function NetWorthCard() {
         className="text-3xl font-bold ft-num"
         style={{ color: isPositive ? "var(--color-ft-good)" : "var(--color-ft-bad)" }}
       >
-        {isPositive ? "" : "-"}{formatMoney(Math.abs(data.totalCents))}
+        {isPositive ? "" : "-"}{formatMoney(Math.abs(data.totalCents), currencyCode)}
       </p>
       <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
         {data.accountCount} {t("accounts")}

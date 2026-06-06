@@ -1,6 +1,10 @@
 "use client";
+import { useQuery } from "convex/react";
+import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import dynamic from "next/dynamic";
+import { CurrencySelector } from "@/components/ui/CurrencySelector";
 
 const IncomeExpensesChart = dynamic(
   () => import("./IncomeExpensesChart").then((m) => ({ default: m.IncomeExpensesChart })),
@@ -35,24 +39,42 @@ function ReportCard({ title, children }: { title: string; children: React.ReactN
 
 export function ReportShell() {
   const t = useTranslations("reports");
+  const currencies = useQuery(api.fintrack.accounts.getDistinctCurrencies);
+  const userSettings = useQuery(api.fintrack.user_settings.get);
+  const [selected, setSelected] = useState<string | undefined>();
+
+  // Defensive resolution: local selection → defaultCurrency if active → first active → "USD"
+  const effectiveCurrency = (() => {
+    if (!currencies || currencies.length === 0) return userSettings?.defaultCurrency ?? "USD";
+    if (selected && currencies.includes(selected)) return selected;
+    const def = userSettings?.defaultCurrency ?? "USD";
+    return currencies.includes(def) ? def : currencies[0];
+  })();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-      <ReportCard title={t("incomeVsExpenses")}>
-        <IncomeExpensesChart />
-      </ReportCard>
+    <div className="space-y-4">
+      {/* Currency selector — only visible when user has multiple currencies */}
+      <div className="flex justify-end">
+        <CurrencySelector value={effectiveCurrency} currencies={currencies} onChange={setSelected} />
+      </div>
 
-      <ReportCard title={t("byCategory")}>
-        <CategoryPieChart />
-      </ReportCard>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <ReportCard title={t("incomeVsExpenses")}>
+          <IncomeExpensesChart currencyCode={effectiveCurrency} />
+        </ReportCard>
 
-      <ReportCard title={t("cashFlow")}>
-        <CashFlowChart />
-      </ReportCard>
+        <ReportCard title={t("byCategory")}>
+          <CategoryPieChart currencyCode={effectiveCurrency} />
+        </ReportCard>
 
-      <ReportCard title={t("netWorthOverTime")}>
-        <NetWorthCard />
-      </ReportCard>
+        <ReportCard title={t("cashFlow")}>
+          <CashFlowChart currencyCode={effectiveCurrency} />
+        </ReportCard>
+
+        <ReportCard title={t("netWorthOverTime")}>
+          <NetWorthCard currencyCode={effectiveCurrency} />
+        </ReportCard>
+      </div>
     </div>
   );
 }
