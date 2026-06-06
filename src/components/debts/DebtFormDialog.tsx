@@ -1,9 +1,9 @@
 "use client";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,8 @@ function tsToDateInput(ts?: number): string {
 export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
   const t = useTranslations("debts");
   const tc = useTranslations("common");
+  const accounts = useQuery(api.fintrack.accounts.list);
+  const userSettings = useQuery(api.fintrack.user_settings.get);
   const createMutation = useMutation(api.fintrack.debts.create);
   const updateMutation = useMutation(api.fintrack.debts.update);
 
@@ -61,13 +63,25 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Set currency when dialog opens in create mode
+  useEffect(() => {
+    if (open && !isEdit) {
+      setCurrency(userSettings?.defaultCurrency ?? "USD");
+    }
+  }, [open, userSettings, isEdit]);
+
+  const currencyOptions = [...new Set([
+    userSettings?.defaultCurrency ?? "USD",
+    ...(accounts ?? []).map((a: Doc<"fintrack_accounts">) => a.currencyCode),
+  ])];
+
   const currentType = isEdit ? debt.type : type;
 
   const reset = () => {
     setName(debt?.name ?? "");
     setLender(debt?.lender ?? "");
     setType(debt?.type ?? "installment");
-    setCurrency(debt?.currencyCode ?? "USD");
+    setCurrency(debt?.currencyCode ?? userSettings?.defaultCurrency ?? "USD");
     setBalance(debt ? String(debt.balanceCents / 100) : "");
     setApr(debt ? String(debt.interestRateBps / 100) : "");
     setMonthly(debt ? String(debt.monthlyPaymentCents / 100) : "");
@@ -201,8 +215,16 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
           {/* Currency */}
           <div className="space-y-1.5">
             <Label style={{ color: "var(--color-ft-text-2)" }}>{t("currency")}</Label>
-            <Input value={currency} onChange={(e) => setCurrency(e.target.value)}
-              placeholder="USD" maxLength={3} className="uppercase" style={inputStyle} />
+            <Select value={currency} onValueChange={(v) => { if (v) setCurrency(v); }} disabled={isEdit}>
+              <SelectTrigger className="w-full" style={inputStyle}>
+                <SelectValue>{currency}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {currencyOptions.map((code) => (
+                  <SelectItem key={code} value={code}>{code}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Balance + APR + Monthly */}

@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,7 @@ export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Pro
   const tc = useTranslations("common");
   const accounts = useQuery(api.fintrack.accounts.list);
   const categories = useQuery(api.fintrack.categories.listActive);
+  const userSettings = useQuery(api.fintrack.user_settings.get);
   const createMutation = useMutation(api.fintrack.subscriptions.create);
   const updateMutation = useMutation(api.fintrack.subscriptions.update);
 
@@ -57,10 +58,23 @@ export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Pro
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Auto-derive currency from selected account (create mode only)
+  useEffect(() => {
+    if (!isEdit && accountId && accounts) {
+      const acc = accounts.find((a: Doc<"fintrack_accounts">) => a._id === accountId);
+      if (acc) setCurrency(acc.currencyCode);
+    }
+  }, [accountId, accounts, isEdit]);
+
+  const selectedAccount = (accounts ?? []).find((a: Doc<"fintrack_accounts">) => a._id === accountId);
+  const selectedCat = categoryId !== "none"
+    ? (categories ?? []).find((c: Doc<"fintrack_categories">) => c._id === categoryId)
+    : undefined;
+
   const reset = () => {
     setName(subscription?.name ?? "");
     setAmount(subscription ? String(subscription.amount / 100) : "");
-    setCurrency(subscription?.currencyCode ?? "USD");
+    setCurrency(subscription?.currencyCode ?? userSettings?.defaultCurrency ?? "USD");
     setPeriodicity(subscription?.periodicity ?? "monthly");
     setNextRenewal(tsToDateInput(subscription?.nextRenewalDate ?? Date.now()));
     setAccountId(subscription?.accountId ?? "");
@@ -133,18 +147,11 @@ export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Pro
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          {/* Name + Currency */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label style={{ color: "var(--color-ft-text-2)" }}>{t("name")}</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Netflix" style={inputStyle} />
-            </div>
-            <div className="space-y-1.5">
-              <Label style={{ color: "var(--color-ft-text-2)" }}>{t("currency")}</Label>
-              <Input value={currency} onChange={(e) => setCurrency(e.target.value)}
-                placeholder="USD" maxLength={3} className="uppercase" style={inputStyle} />
-            </div>
+          {/* Name */}
+          <div className="space-y-1.5">
+            <Label style={{ color: "var(--color-ft-text-2)" }}>{t("name")}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Netflix" style={inputStyle} />
           </div>
 
           {/* Amount + Periodicity */}
@@ -177,19 +184,29 @@ export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Pro
               onChange={(e) => setNextRenewal(e.target.value)} style={inputStyle} />
           </div>
 
-          {/* Account */}
+          {/* Account + currency badge */}
           <div className="space-y-1.5">
             <Label style={{ color: "var(--color-ft-text-2)" }}>{t("account")}</Label>
-            <Select value={accountId} onValueChange={(v) => { if (v) setAccountId(v); }}>
-              <SelectTrigger className="w-full" style={inputStyle}>
-                <SelectValue placeholder="—" />
-              </SelectTrigger>
-              <SelectContent>
-                {(accounts ?? []).map((a: Doc<"fintrack_accounts">) => (
-                  <SelectItem key={a._id} value={a._id}>{a.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Select value={accountId} onValueChange={(v) => { if (v) setAccountId(v); }}>
+                <SelectTrigger className="flex-1" style={inputStyle}>
+                  <SelectValue>
+                    {selectedAccount ? selectedAccount.name : accounts === undefined ? "Loading…" : "Select account"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {(accounts ?? []).map((a: Doc<"fintrack_accounts">) => (
+                    <SelectItem key={a._id} value={a._id}>{a.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {currency && (
+                <span className="text-xs font-mono font-semibold px-2 py-2 rounded shrink-0"
+                  style={{ backgroundColor: "var(--color-ft-surface-2)", color: "var(--color-ft-primary)", border: "1px solid var(--color-ft-border)" }}>
+                  {currency}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Category (optional) */}
@@ -197,12 +214,18 @@ export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Pro
             <Label style={{ color: "var(--color-ft-text-2)" }}>{t("category")}</Label>
             <Select value={categoryId} onValueChange={(v) => { if (v !== null) setCategoryId(v); }}>
               <SelectTrigger className="w-full" style={inputStyle}>
-                <SelectValue />
+                <SelectValue>
+                  {selectedCat
+                    ? `${selectedCat.icon} ${selectedCat.name}`
+                    : categoryId !== "none" && categories === undefined
+                      ? "Loading…"
+                      : t("noCategory")}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">{t("noCategory")}</SelectItem>
                 {(categories ?? []).map((c: Doc<"fintrack_categories">) => (
-                  <SelectItem key={c._id} value={c._id}>{c.name}</SelectItem>
+                  <SelectItem key={c._id} value={c._id}>{c.icon} {c.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

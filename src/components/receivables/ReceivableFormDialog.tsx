@@ -1,9 +1,9 @@
 "use client";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,8 @@ function tsToDateInput(ts?: number): string {
 export function ReceivableFormDialog({ open, onOpenChange, receivable }: Props) {
   const t = useTranslations("receivables");
   const tc = useTranslations("common");
+  const accounts = useQuery(api.fintrack.accounts.list);
+  const userSettings = useQuery(api.fintrack.user_settings.get);
   const createMutation = useMutation(api.fintrack.receivables.create);
   const updateMutation = useMutation(api.fintrack.receivables.update);
 
@@ -55,10 +57,21 @@ export function ReceivableFormDialog({ open, onOpenChange, receivable }: Props) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (open && !isEdit) {
+      setCurrency(userSettings?.defaultCurrency ?? "USD");
+    }
+  }, [open, userSettings, isEdit]);
+
+  const currencyOptions = [...new Set([
+    userSettings?.defaultCurrency ?? "USD",
+    ...(accounts ?? []).map((a: Doc<"fintrack_accounts">) => a.currencyCode),
+  ])];
+
   const reset = () => {
     setDebtorName(receivable?.debtorName ?? "");
     setDescription(receivable?.description ?? "");
-    setCurrency(receivable?.currencyCode ?? "USD");
+    setCurrency(receivable?.currencyCode ?? userSettings?.defaultCurrency ?? "USD");
     setAmount(receivable ? String(receivable.originalAmount / 100) : "");
     setOriginDate(tsToDateInput(receivable?.originDate));
     setDueDate(tsToDateInput(receivable?.dueDate));
@@ -145,8 +158,16 @@ export function ReceivableFormDialog({ open, onOpenChange, receivable }: Props) 
             </div>
             <div className="space-y-1.5">
               <Label style={{ color: "var(--color-ft-text-2)" }}>{t("currency")}</Label>
-              <Input value={currency} onChange={(e) => setCurrency(e.target.value)}
-                placeholder="USD" maxLength={3} className="uppercase" style={inputStyle} disabled={isEdit} />
+              <Select value={currency} onValueChange={(v) => { if (v) setCurrency(v); }} disabled={isEdit}>
+                <SelectTrigger className="w-full" style={inputStyle}>
+                  <SelectValue>{currency}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map((code) => (
+                    <SelectItem key={code} value={code}>{code}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
