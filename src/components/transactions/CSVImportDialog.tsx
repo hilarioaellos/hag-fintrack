@@ -4,7 +4,7 @@ import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
 import { useRef, useState } from "react";
 import Papa from "papaparse";
-import { Upload, CheckCircle } from "lucide-react";
+import { Upload, CheckCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -84,6 +84,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
     imported: number;
     skipped: number;
     skippedRows: SkippedRow[];
+    partialError?: string;
   } | null>(null);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
@@ -360,9 +361,12 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
           <div className="space-y-4 mt-2">
             {/* Summary */}
             <div className="flex flex-col items-center gap-3 py-4">
-              <CheckCircle className="h-9 w-9" style={{ color: "var(--color-ft-good)" }} />
+              {result.partialError
+                ? <AlertTriangle className="h-9 w-9" style={{ color: "var(--color-ft-warn)" }} />
+                : <CheckCircle className="h-9 w-9" style={{ color: "var(--color-ft-good)" }} />
+              }
               <p className="font-semibold" style={{ color: "var(--color-ft-text)" }}>
-                Import complete
+                {result.partialError ? "Partial import" : "Import complete"}
               </p>
               <div className="flex gap-4 text-sm">
                 <span style={{ color: "var(--color-ft-good)" }}>
@@ -375,6 +379,23 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                 )}
               </div>
             </div>
+
+            {/* Partial error banner */}
+            {result.partialError && (
+              <div
+                className="rounded-lg px-3 py-2.5 text-xs space-y-1"
+                style={{
+                  backgroundColor: "color-mix(in srgb, var(--color-ft-bad) 10%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--color-ft-bad) 25%, transparent)",
+                  color: "var(--color-ft-bad)",
+                }}
+              >
+                <p className="font-medium">{result.partialError}</p>
+                <p style={{ color: "var(--color-ft-text-3)" }}>
+                  You can re-run the import safely — already-imported rows will be skipped automatically.
+                </p>
+              </div>
+            )}
 
             {/* Skipped rows report */}
             {result.skippedRows.length > 0 && (() => {
