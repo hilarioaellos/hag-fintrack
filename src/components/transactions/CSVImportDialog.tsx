@@ -26,6 +26,14 @@ import type { Doc } from "@convex-api/dataModel";
 type Step = "upload" | "map" | "preview" | "done";
 type DateFormat = "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD";
 
+type SkippedRow = {
+  date: string;
+  description: string;
+  amountCents: number;
+  type: string;
+  reason: "duplicate" | "transfer_match";
+};
+
 function normalizeDate(raw: string, format: DateFormat): string {
   const s = raw.trim();
   if (format === "YYYY-MM-DD") return s;
@@ -73,13 +81,6 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
   const [invertSign, setInvertSign] = useState(false);
   const [parsedRows, setParsedRows] = useState<CsvRow[]>([]);
   const [loading, setLoading] = useState(false);
-  type SkippedRow = {
-    date: string;
-    description: string;
-    amountCents: number;
-    type: string;
-    reason: "duplicate" | "transfer_match";
-  };
   const [result, setResult] = useState<{
     imported: number;
     skipped: number;
