@@ -169,7 +169,8 @@
     "periodicity_biweekly": "Bi-weekly",
     "periodicity_weekly": "Weekly",
     "periodicity_one_time": "One-time",
-    "amortizationInsufficientPayment": "Monthly payment does not cover interest — amortization table unavailable."
+    "amortizationInsufficientPayment": "Monthly payment does not cover interest — amortization table unavailable.",
+    "snowballMixedCurrencyWarning": "Your debts are in different currencies. Without exchange rates, snowball order is based on raw amounts and may not reflect the true smallest balance."
   },
   "receivables": {
     "title": "Receivables",

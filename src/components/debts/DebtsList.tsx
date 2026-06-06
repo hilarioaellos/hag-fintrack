@@ -4,7 +4,7 @@ import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DebtCard } from "./DebtCard";
 import { DebtFormDialog } from "./DebtFormDialog";
@@ -103,6 +103,21 @@ export function DebtsList() {
             <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
               {t(`${strategy}Desc`)}
             </p>
+
+            {/* Mixed-currency snowball warning */}
+            {strategy === "snowball" && currencies.size > 1 && (
+              <div
+                className="flex items-start gap-2 rounded-lg px-3 py-2.5 text-xs"
+                style={{
+                  backgroundColor: "color-mix(in srgb, var(--color-ft-warn) 10%, transparent)",
+                  color: "var(--color-ft-warn)",
+                  border: "1px solid color-mix(in srgb, var(--color-ft-warn) 25%, transparent)",
+                }}
+              >
+                <TriangleAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>{t("snowballMixedCurrencyWarning")}</span>
+              </div>
+            )}
 
             {/* Ordered list */}
             <div className="space-y-2">

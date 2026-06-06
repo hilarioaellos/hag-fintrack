@@ -169,7 +169,8 @@
     "periodicity_biweekly": "Quincenal",
     "periodicity_weekly": "Semanal",
     "periodicity_one_time": "Único",
-    "amortizationInsufficientPayment": "El pago mensual no cubre el interés — tabla de amortización no disponible."
+    "amortizationInsufficientPayment": "El pago mensual no cubre el interés — tabla de amortización no disponible.",
+    "snowballMixedCurrencyWarning": "Tus deudas están en diferentes monedas. Sin tasas de cambio, el orden de bola de nieve se basa en montos brutos y puede no reflejar el saldo real más pequeño."
   },
   "receivables": {
     "title": "Acreencias",
