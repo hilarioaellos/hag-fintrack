@@ -24,6 +24,21 @@ import {
 import type { Doc } from "@convex-api/dataModel";
 
 type Step = "upload" | "map" | "preview" | "done";
+type DateFormat = "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD";
+
+function normalizeDate(raw: string, format: DateFormat): string {
+  const s = raw.trim();
+  if (format === "YYYY-MM-DD") return s;
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s);
+  if (!match) return s; // let backend reject with a clear error
+  if (format === "DD/MM/YYYY") {
+    const [, dd, mm, yyyy] = match;
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+  }
+  // MM/DD/YYYY
+  const [, mm, dd, yyyy] = match;
+  return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+}
 
 interface CsvRow {
   date: string;
@@ -54,6 +69,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
   const [colDate, setColDate] = useState("");
   const [colDesc, setColDesc] = useState("");
   const [colAmount, setColAmount] = useState("");
+  const [dateFormat, setDateFormat] = useState<DateFormat>("MM/DD/YYYY");
   const [invertSign, setInvertSign] = useState(false);
   const [parsedRows, setParsedRows] = useState<CsvRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -80,6 +96,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
     setColDate("");
     setColDesc("");
     setColAmount("");
+    setDateFormat("MM/DD/YYYY");
     setInvertSign(false);
     setParsedRows([]);
     setLoading(false);
@@ -131,7 +148,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
       if (isNaN(rawAmount)) continue;
       const signedAmount = invertSign ? -rawAmount : rawAmount;
       rows.push({
-        date: row[di] ?? "",
+        date: normalizeDate(row[di] ?? "", dateFormat),
         description: (row[dei] ?? "").trim(),
         amountCents: Math.abs(dollarsToCents(Math.abs(signedAmount))),
         type: signedAmount >= 0 ? "income" : "expense",
@@ -247,6 +264,21 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                 </Select>
               </div>
             ))}
+
+            {/* Date format */}
+            <div className="space-y-1.5">
+              <Label style={{ color: "var(--color-ft-text-2)" }}>Date format</Label>
+              <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as DateFormat)}>
+                <SelectTrigger className="w-full" style={inputStyle}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (US)</SelectItem>
+                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (Europe / LATAM)</SelectItem>
+                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (ISO)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             {/* Invert sign */}
             <label className="flex items-center gap-2 cursor-pointer">
