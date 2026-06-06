@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { formatMoney } from "@/lib/money";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -49,7 +50,7 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => [`$${(value / 100).toFixed(2)}`]}
+                formatter={(value: number) => [formatMoney(value, currencyCode)]}
                 contentStyle={{
                   backgroundColor: "var(--color-ft-surface-2)",
                   border: "1px solid var(--color-ft-border)",

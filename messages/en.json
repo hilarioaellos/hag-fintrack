@@ -278,7 +278,8 @@
     "netWorth": "Net Worth",
     "accounts": "accounts",
     "noData": "No data for this period",
-    "last6Months": "Last 6 months"
+    "last6Months": "Last 6 months",
+    "day": "Day {day}"
   },
   "reconciliation": {
     "title": "Reconciliation",

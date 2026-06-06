@@ -14,3 +14,21 @@ export const formatMoney = (cents: number, currency = "USD") => {
     return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);
   }
 };
+
+export const formatMoneyCompact = (cents: number, currency = "USD"): string => {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(cents / 100);
+  } catch {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      maximumFractionDigits: 1,
+    }).format(cents / 100);
+  }
+};

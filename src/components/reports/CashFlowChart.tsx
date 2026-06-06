@@ -3,6 +3,7 @@ import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { formatMoney, formatMoneyCompact } from "@/lib/money";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid,
@@ -43,18 +44,18 @@ export function CashFlowChart({ currencyCode }: { currencyCode: string }) {
               interval={4}
             />
             <YAxis
-              tickFormatter={(v) => `$${(v / 100).toFixed(0)}`}
+              tickFormatter={(v: number) => formatMoneyCompact(v, currencyCode)}
               tick={{ fontSize: 10, fill: "var(--color-ft-text-3)" }}
               axisLine={false}
               tickLine={false}
-              width={44}
+              width={56}
             />
             <Tooltip
               formatter={(value: number, name: string) => [
-                `$${(value / 100).toFixed(2)}`,
+                formatMoney(value, currencyCode),
                 name === "incomeCents" ? t("income") : t("expenses"),
               ]}
-              labelFormatter={(label) => `Day ${label}`}
+              labelFormatter={(label) => t("day", { day: label })}
               contentStyle={{
                 backgroundColor: "var(--color-ft-surface-2)",
                 border: "1px solid var(--color-ft-border)",

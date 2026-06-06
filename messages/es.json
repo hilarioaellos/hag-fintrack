@@ -278,7 +278,8 @@
     "netWorth": "Patrimonio Neto",
     "accounts": "cuentas",
     "noData": "Sin datos para este período",
-    "last6Months": "Últimos 6 meses"
+    "last6Months": "Últimos 6 meses",
+    "day": "Día {day}"
   },
   "reconciliation": {
     "title": "Conciliación",

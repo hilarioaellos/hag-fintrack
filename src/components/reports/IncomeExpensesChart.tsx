@@ -6,12 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, Legend,
 } from "recharts";
-
-function formatK(cents: number): string {
-  const dollars = cents / 100;
-  if (dollars >= 1000) return `$${(dollars / 1000).toFixed(1)}k`;
-  return `$${dollars.toFixed(0)}`;
-}
+import { formatMoney, formatMoneyCompact } from "@/lib/money";
 
 export function IncomeExpensesChart({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
@@ -48,15 +43,15 @@ export function IncomeExpensesChart({ currencyCode }: { currencyCode: string }) 
               tickLine={false}
             />
             <YAxis
-              tickFormatter={formatK}
+              tickFormatter={(v: number) => formatMoneyCompact(v, currencyCode)}
               tick={{ fontSize: 11, fill: "var(--color-ft-text-3)" }}
               axisLine={false}
               tickLine={false}
-              width={40}
+              width={56}
             />
             <Tooltip
               formatter={(value: number, name: string) => [
-                `$${(value / 100).toFixed(2)}`,
+                formatMoney(value, currencyCode),
                 name === "income" ? t("income") : t("expenses"),
               ]}
               contentStyle={{
