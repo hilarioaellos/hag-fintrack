@@ -57,6 +57,8 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
                   borderRadius: "8px",
                   fontSize: 12,
                 }}
+                labelStyle={{ color: "var(--color-ft-text)", marginBottom: 4 }}
+                itemStyle={{ color: "var(--color-ft-text-2)" }}
               />
             </PieChart>
           </ResponsiveContainer>

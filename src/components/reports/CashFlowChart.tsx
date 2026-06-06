@@ -63,6 +63,7 @@ export function CashFlowChart({ currencyCode }: { currencyCode: string }) {
                 fontSize: 12,
               }}
               labelStyle={{ color: "var(--color-ft-text)", marginBottom: 4 }}
+              itemStyle={{ color: "var(--color-ft-text-2)" }}
             />
             <Bar dataKey="incomeCents" fill="#4ade80" radius={[2, 2, 0, 0]} />
             <Bar dataKey="expenseCents" fill="#f87171" radius={[2, 2, 0, 0]} />

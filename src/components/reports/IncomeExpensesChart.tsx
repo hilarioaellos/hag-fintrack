@@ -61,6 +61,7 @@ export function IncomeExpensesChart({ currencyCode }: { currencyCode: string }) 
                 fontSize: 12,
               }}
               labelStyle={{ color: "var(--color-ft-text)", marginBottom: 4 }}
+              itemStyle={{ color: "var(--color-ft-text-2)" }}
             />
             <Legend
               formatter={(value) => (
