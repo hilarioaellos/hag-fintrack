@@ -20,7 +20,7 @@ export function NotificationBell() {
         onClick={() => setOpen((o) => !o)}
         className="relative p-1.5 rounded-lg transition-colors hover:bg-[var(--color-ft-surface-2)]"
         style={{ color: "var(--color-ft-text-3)" }}
-        aria-label="Notifications"
+        aria-label={t("ariaLabel")}
       >
         <Bell className="h-4 w-4" />
         {count > 0 && (
@@ -70,7 +70,9 @@ export function NotificationBell() {
                 {notifications!.map((n: Doc<"fintrack_notifications">) => (
                   <div key={n._id} className="px-3 py-2.5">
                     <p className="text-xs leading-snug" style={{ color: "var(--color-ft-text)" }}>
-                      {n.message}
+                      {n.type === "payment_due"
+                        ? t("paymentDue", { account: n.message })
+                        : n.message}
                     </p>
                     <span
                       className="mt-1 inline-block text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-full"
@@ -89,7 +91,7 @@ export function NotificationBell() {
                             : "var(--color-ft-border)",
                       }}
                     >
-                      {n.severity}
+                      {t(`severity.${n.severity as "urgent" | "warning" | "info"}`)}
                     </span>
                   </div>
                 ))}

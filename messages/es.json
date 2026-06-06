@@ -272,8 +272,15 @@
   },
   "notifications": {
     "title": "Notificaciones",
+    "ariaLabel": "Notificaciones",
     "markAllRead": "Marcar todo leído",
-    "noNotifications": "Sin notificaciones nuevas"
+    "noNotifications": "Sin notificaciones nuevas",
+    "paymentDue": "Pago vence hoy para {account}",
+    "severity": {
+      "urgent": "Urgente",
+      "warning": "Advertencia",
+      "info": "Info"
+    }
   },
   "reports": {
     "title": "Reportes",

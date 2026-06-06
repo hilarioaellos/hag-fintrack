@@ -272,8 +272,15 @@
   },
   "notifications": {
     "title": "Notifications",
+    "ariaLabel": "Notifications",
     "markAllRead": "Mark all read",
-    "noNotifications": "No new notifications"
+    "noNotifications": "No new notifications",
+    "paymentDue": "Payment due today for {account}",
+    "severity": {
+      "urgent": "Urgent",
+      "warning": "Warning",
+      "info": "Info"
+    }
   },
   "reports": {
     "title": "Reports",
