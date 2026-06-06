@@ -236,7 +236,11 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
               <Label style={{ color: "var(--color-ft-text-2)" }}>Account</Label>
               <Select value={accountId} onValueChange={(v) => { if (v) setAccountId(v); }}>
                 <SelectTrigger className="w-full" style={inputStyle}>
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue>
+                    {accountId && accounts
+                      ? (accounts.find((a: Doc<"fintrack_accounts">) => a._id === accountId)?.name ?? "Select account")
+                      : "Select account"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {accounts?.map((a: Doc<"fintrack_accounts">) => (
@@ -256,7 +260,11 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                 <Label style={{ color: "var(--color-ft-text-2)" }}>{label}</Label>
                 <Select value={value} onValueChange={(v) => { if (v) set(v); }}>
                   <SelectTrigger className="w-full" style={inputStyle}>
-                    <SelectValue placeholder="Select column" />
+                    <SelectValue>
+                      {value !== "" && Number(value) >= 0 && headers[Number(value)]
+                        ? headers[Number(value)]
+                        : "Select column"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {headers.map((h, i) => (

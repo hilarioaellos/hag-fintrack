@@ -37,7 +37,9 @@ export function ReconciliationList() {
       <div className="max-w-xs">
         <Select value={accountId} onValueChange={(v) => { if (v) setAccountId(v); }}>
           <SelectTrigger style={inputStyle}>
-            <SelectValue placeholder={t("selectAccount")} />
+            <SelectValue>
+              {selectedAccount?.name ?? t("selectAccount")}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {accounts.map((a: Doc<"fintrack_accounts">) => (
