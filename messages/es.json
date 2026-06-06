@@ -306,6 +306,11 @@
     "confirm": "Confirmar Conciliación",
     "history": "Historial de Conciliaciones",
     "noHistory": "Sin conciliaciones para esta cuenta",
+    "newReconciliation": "Nueva conciliación",
+    "optional": "(opcional)",
+    "bankLabel": "Banco",
+    "errorBankBalanceRequired": "Ingresa el saldo del estado de cuenta",
+    "errorInvalidDate": "Fecha inválida",
     "status": {
       "completed": "Cuadrado",
       "discrepancy": "Discrepancia",

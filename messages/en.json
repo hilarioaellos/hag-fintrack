@@ -306,6 +306,11 @@
     "confirm": "Confirm Reconciliation",
     "history": "Reconciliation History",
     "noHistory": "No reconciliations yet for this account",
+    "newReconciliation": "New reconciliation",
+    "optional": "(optional)",
+    "bankLabel": "Bank",
+    "errorBankBalanceRequired": "Enter the bank balance",
+    "errorInvalidDate": "Invalid date",
     "status": {
       "completed": "Balanced",
       "discrepancy": "Discrepancy",

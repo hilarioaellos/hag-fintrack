@@ -48,9 +48,9 @@ export function ReconcileForm({ account, onCreated }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!bankBalance) { setError("Enter the bank balance"); return; }
+    if (!bankBalance) { setError(t("errorBankBalanceRequired")); return; }
     const dateTs = new Date(date + "T12:00:00").getTime();
-    if (isNaN(dateTs)) { setError("Invalid date"); return; }
+    if (isNaN(dateTs)) { setError(t("errorInvalidDate")); return; }
     setLoading(true);
     setError("");
     try {
@@ -80,7 +80,7 @@ export function ReconcileForm({ account, onCreated }: Props) {
         </p>
         <Button size="sm" onClick={reset}
           style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18" }}>
-          New reconciliation
+          {t("newReconciliation")}
         </Button>
       </div>
     );
@@ -149,7 +149,7 @@ export function ReconcileForm({ account, onCreated }: Props) {
       {/* Notes */}
       <div className="space-y-1.5">
         <Label style={{ color: "var(--color-ft-text-2)" }}>
-          {t("notes")} <span style={{ color: "var(--color-ft-text-3)" }}>(optional)</span>
+          {t("notes")} <span style={{ color: "var(--color-ft-text-3)" }}>{t("optional")}</span>
         </Label>
         <Textarea value={notes} onChange={(e) => setNotes(e.target.value)}
           placeholder={t("notesPlaceholder")} rows={2} style={inputStyle} />

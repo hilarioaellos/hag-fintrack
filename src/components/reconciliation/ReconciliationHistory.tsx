@@ -2,8 +2,7 @@
 import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
-import { useTranslations } from "next-intl";
-import { format } from "date-fns";
+import { useTranslations, useLocale } from "next-intl";
 import type { Doc, Id } from "@convex-api/dataModel";
 
 type Rec = Doc<"fintrack_reconciliations">;
@@ -22,6 +21,7 @@ interface Props {
 export function ReconciliationHistory({ accountId, currency }: Props) {
   const t = useTranslations("reconciliation");
   const tc = useTranslations("common");
+  const locale = useLocale();
   const records = useQuery(api.fintrack.reconciliations.listByAccount, { accountId });
 
   if (records === undefined) {
@@ -54,7 +54,7 @@ export function ReconciliationHistory({ accountId, currency }: Props) {
                   {t(`status.${r.status}`)}
                 </span>
                 <span className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-                  {format(new Date(r.date), "MMM d, yyyy")}
+                  {new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", year: "numeric" }).format(new Date(r.date))}
                 </span>
               </div>
               {r.notes && (
@@ -65,7 +65,7 @@ export function ReconciliationHistory({ accountId, currency }: Props) {
             </div>
             <div className="text-right shrink-0">
               <p className="text-xs font-mono" style={{ color: "var(--color-ft-text-2)" }}>
-                Bank: {formatMoney(r.bankBalanceCents, currency)}
+                {t("bankLabel")}: {formatMoney(r.bankBalanceCents, currency)}
               </p>
               {r.differenceCents !== 0 && (
                 <p
