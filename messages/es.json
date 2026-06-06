@@ -378,6 +378,15 @@
     "version": "Versión",
     "dataBackup": "Copia de Datos",
     "saved": "¡Guardado!",
-    "automatic": "Automática"
+    "automatic": "Automática",
+    "dangerZone": "Zona de Riesgo",
+    "clearData": "Limpiar datos de prueba",
+    "clearDataDesc": "Elimina permanentemente todas las cuentas, transacciones, deudas, suscripciones, acreencias, presupuestos, conciliaciones, preferencias de categorías y categorías personalizadas. Solo se conservan las preferencias de idioma, moneda y tema. Esta acción no se puede deshacer.",
+    "clearDataConfirmPrompt": "Esto eliminará TODOS tus datos financieros permanentemente. Escribe {word} para confirmar.",
+    "clearDataConfirmWord": "ELIMINAR",
+    "clearDataConfirm": "Sí, eliminar todo",
+    "clearDataClearing": "Eliminando…",
+    "clearDataDone": "Datos eliminados",
+    "clearDataError": "Error al eliminar los datos. Intenta de nuevo."
   }
 }

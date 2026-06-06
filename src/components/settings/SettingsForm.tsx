@@ -4,8 +4,10 @@ import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
+import { AlertTriangle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -199,6 +201,108 @@ function CategoryPreferences() {
   );
 }
 
+function DangerZone() {
+  const t = useTranslations("settings");
+  const tc = useTranslations("common");
+  const clearUserData = useMutation(api.fintrack.user_settings.clearUserData);
+  const [step, setStep] = useState<"idle" | "confirming" | "clearing" | "done">("idle");
+  const [confirmText, setConfirmText] = useState("");
+  const [clearError, setClearError] = useState("");
+
+  const CONFIRM_WORD = t("clearDataConfirmWord");
+
+  const resetConfirm = () => {
+    setStep("idle");
+    setConfirmText("");
+    setClearError("");
+  };
+
+  const handleConfirm = async () => {
+    setStep("clearing");
+    setClearError("");
+    try {
+      await clearUserData({});
+      setConfirmText("");
+      setStep("done");
+      setTimeout(() => setStep("idle"), 4000);
+    } catch {
+      setClearError(t("clearDataError"));
+      setStep("confirming");
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+        {t("clearDataDesc")}
+      </p>
+
+      {step === "idle" && (
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => setStep("confirming")}
+          style={{ borderColor: "var(--color-ft-bad)", color: "var(--color-ft-bad)" }}
+        >
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          {t("clearData")}
+        </Button>
+      )}
+
+      {step === "confirming" && (
+        <div className="space-y-3">
+          <p className="text-xs font-medium" style={{ color: "var(--color-ft-bad)" }}>
+            {t("clearDataConfirmPrompt", { word: CONFIRM_WORD })}
+          </p>
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder={CONFIRM_WORD}
+            style={{
+              backgroundColor: "var(--color-ft-surface-2)",
+              borderColor: "var(--color-ft-bad)",
+              color: "var(--color-ft-text)",
+            }}
+          />
+          {clearError && (
+            <p className="text-xs" style={{ color: "var(--color-ft-bad)" }}>{clearError}</p>
+          )}
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={resetConfirm}
+              style={{ borderColor: "var(--color-ft-border)", color: "var(--color-ft-text-2)" }}
+            >
+              {tc("cancel")}
+            </Button>
+            <Button
+              className="flex-1"
+              disabled={confirmText !== CONFIRM_WORD}
+              onClick={handleConfirm}
+              style={{ backgroundColor: "var(--color-ft-bad)", color: "#fff" }}
+            >
+              {t("clearDataConfirm")}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {step === "clearing" && (
+        <p className="text-sm text-center" style={{ color: "var(--color-ft-text-3)" }}>
+          {t("clearDataClearing")}
+        </p>
+      )}
+
+      {step === "done" && (
+        <p className="text-sm text-center font-medium" style={{ color: "var(--color-ft-good)" }}>
+          ✓ {t("clearDataDone")}
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function SettingsForm() {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
@@ -308,6 +412,21 @@ export function SettingsForm() {
           <p>{t("version")}: v1.0.0</p>
           <p>{t("dataBackup")}: {t("automatic")}</p>
         </div>
+      </div>
+
+      {/* Danger Zone Card */}
+      <div
+        className="rounded-xl border p-5 space-y-4"
+        style={{
+          backgroundColor: "var(--color-ft-surface)",
+          borderColor: "color-mix(in srgb, var(--color-ft-bad) 40%, var(--color-ft-border))",
+        }}
+      >
+        <p className="text-sm font-semibold flex items-center gap-2" style={{ color: "var(--color-ft-bad)" }}>
+          <AlertTriangle className="h-4 w-4" />
+          {t("dangerZone")}
+        </p>
+        <DangerZone />
       </div>
     </div>
   );

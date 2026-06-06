@@ -378,6 +378,15 @@
     "version": "Version",
     "dataBackup": "Data Backup",
     "saved": "Saved!",
-    "automatic": "Automatic"
+    "automatic": "Automatic",
+    "dangerZone": "Danger Zone",
+    "clearData": "Clear test data",
+    "clearDataDesc": "Permanently deletes all accounts, transactions, debts, subscriptions, receivables, budgets, reconciliations, category preferences and custom categories. Only language, currency and theme preferences are kept. This action cannot be undone.",
+    "clearDataConfirmPrompt": "This will permanently delete ALL your financial data. Type {word} to confirm.",
+    "clearDataConfirmWord": "DELETE",
+    "clearDataConfirm": "Yes, delete everything",
+    "clearDataClearing": "Deleting…",
+    "clearDataDone": "All data cleared",
+    "clearDataError": "Failed to clear data. Please try again."
   }
 }
