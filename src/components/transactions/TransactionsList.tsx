@@ -282,6 +282,7 @@ export function TransactionsList() {
         defaultAccountId={filterAccountId !== "all" ? filterAccountId : undefined}
       />
       <TransactionFormDialog
+        key={editTx?._id ?? "edit-closed"}
         open={!!editTx}
         onOpenChange={(o) => { if (!o) setEditTx(undefined); }}
         transaction={editTx}

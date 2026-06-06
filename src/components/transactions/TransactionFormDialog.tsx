@@ -174,6 +174,13 @@ export function TransactionFormDialog({
     }
   };
 
+  const selectedCat = categoryId
+    ? categories?.find((c: Doc<"fintrack_categories">) => c._id === categoryId)
+    : undefined;
+  const categoryLabel = categoryId
+    ? (selectedCat ? `${selectedCat.icon} ${selectedCat.name}` : categories === undefined ? "Loading…" : "Uncategorized")
+    : "Uncategorized";
+
   const typeColor =
     type === "income"
       ? "var(--color-ft-good)"
@@ -248,7 +255,11 @@ export function TransactionFormDialog({
               </Label>
               <Select value={accountId} onValueChange={(v) => { if (v) setAccountId(v); }}>
                 <SelectTrigger className="w-full" style={inputStyle}>
-                  <SelectValue placeholder="Select account" />
+                  <SelectValue>
+                    {accountId && accounts
+                      ? (accounts.find((a: Doc<"fintrack_accounts">) => a._id === accountId)?.name ?? "Select account")
+                      : "Select account"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {accounts?.map((a: Doc<"fintrack_accounts">) => (
@@ -267,7 +278,11 @@ export function TransactionFormDialog({
               <Label style={{ color: "var(--color-ft-text-2)" }}>To account</Label>
               <Select value={toAccountId} onValueChange={(v) => { if (v) setToAccountId(v); }}>
                 <SelectTrigger className="w-full" style={inputStyle}>
-                  <SelectValue placeholder="Select destination" />
+                  <SelectValue>
+                    {toAccountId && accounts
+                      ? (accounts.find((a: Doc<"fintrack_accounts">) => a._id === toAccountId)?.name ?? "Select destination")
+                      : "Select destination"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {accounts
@@ -289,7 +304,9 @@ export function TransactionFormDialog({
             </Label>
             <Select value={categoryId} onValueChange={(v) => { if (v) setCategoryId(v); }}>
               <SelectTrigger className="w-full" style={inputStyle}>
-                <SelectValue placeholder="Uncategorized" />
+                <SelectValue>
+                  {categoryLabel}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {categories?.map((c: Doc<"fintrack_categories">) => (
