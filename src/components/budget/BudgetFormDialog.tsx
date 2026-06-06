@@ -48,6 +48,7 @@ export function BudgetFormDialog({ open, onOpenChange, year, month, budget, budg
     (c: Doc<"fintrack_categories">) =>
       isEdit ? true : !budgetedCategoryIds.has(c._id)
   );
+  const selectedCat = availableCategories.find((c: Doc<"fintrack_categories">) => c._id === categoryId);
 
   const [categoryId, setCategoryId] = useState(budget?.categoryId ?? "");
   const [amount, setAmount] = useState(budget ? String(budget.amountPlannedCents / 100) : "");
@@ -112,7 +113,9 @@ export function BudgetFormDialog({ open, onOpenChange, year, month, budget, budg
               ) : (
                 <Select value={categoryId} onValueChange={(v) => { if (v) setCategoryId(v); }}>
                   <SelectTrigger className="w-full" style={inputStyle}>
-                    <SelectValue placeholder={t("selectCategory")} />
+                    <SelectValue>
+                      {selectedCat ? `${selectedCat.icon} ${selectedCat.name}` : t("selectCategory")}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {availableCategories.map((c: Doc<"fintrack_categories">) => (

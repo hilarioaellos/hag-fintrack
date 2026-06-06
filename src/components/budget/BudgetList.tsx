@@ -32,7 +32,9 @@ export function BudgetList() {
   const [copying, setCopying] = useState(false);
 
   const budgets = useQuery(api.fintrack.budgets.listWithActuals, { year, month });
+  const userSettings = useQuery(api.fintrack.user_settings.get);
   const copyMutation = useMutation(api.fintrack.budgets.copyFromPreviousMonth);
+  const activeCurrency = userSettings?.defaultCurrency ?? "USD";
 
   const budgetedCategoryIds: Set<string> = new Set(
     (budgets ?? []).map((b: Budget) => b.categoryId as string)
@@ -56,7 +58,15 @@ export function BudgetList() {
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <MonthNav year={year} month={month} onChange={(y, m) => setPeriod({ year: y, month: m })} />
+        <div className="flex items-center gap-3">
+          <MonthNav year={year} month={month} onChange={(y, m) => setPeriod({ year: y, month: m })} />
+          <span
+            className="text-xs font-mono font-semibold px-2 py-1 rounded"
+            style={{ backgroundColor: "var(--color-ft-surface-2)", color: "var(--color-ft-primary)" }}
+          >
+            {activeCurrency}
+          </span>
+        </div>
         <div className="flex items-center gap-2">
           <Button
             size="sm"
