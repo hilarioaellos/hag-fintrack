@@ -3,6 +3,7 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import Papa from "papaparse";
 import { Upload, CheckCircle, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,6 +68,8 @@ interface Props {
 }
 
 export function CSVImportDialog({ open, onOpenChange }: Props) {
+  const t = useTranslations("csvImport");
+  const tc = useTranslations("common");
   const accounts = useQuery(api.fintrack.accounts.list);
   const batchImport = useAction(api.fintrack.import.batchImport);
 
@@ -119,7 +122,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
       skipEmptyLines: true,
       complete: (res) => {
         const rows = res.data as string[][];
-        if (rows.length < 2) { setError("CSV must have at least a header and one row"); return; }
+        if (rows.length < 2) { setError(t("errorMinRows")); return; }
         setHeaders(rows[0]);
         setRawRows(rows.slice(1));
         // Auto-detect common column names
@@ -130,15 +133,15 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
         setError("");
         setStep("map");
       },
-      error: () => setError("Failed to parse CSV"),
+      error: () => setError(t("errorParse")),
     });
   };
 
   const handleMapConfirm = () => {
-    if (!accountId) { setError("Select an account"); return; }
-    if (colDate === "" || colDate === "-1") { setError("Select date column"); return; }
-    if (colDesc === "" || colDesc === "-1") { setError("Select description column"); return; }
-    if (colAmount === "" || colAmount === "-1") { setError("Select amount column"); return; }
+    if (!accountId) { setError(t("errorSelectAccount")); return; }
+    if (colDate === "" || colDate === "-1") { setError(t("errorSelectDate")); return; }
+    if (colDesc === "" || colDesc === "-1") { setError(t("errorSelectDesc")); return; }
+    if (colAmount === "" || colAmount === "-1") { setError(t("errorSelectAmount")); return; }
 
     const di = parseInt(colDate);
     const dei = parseInt(colDesc);
@@ -157,7 +160,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
       });
     }
 
-    if (rows.length === 0) { setError("No valid rows found"); return; }
+    if (rows.length === 0) { setError(t("errorNoValidRows")); return; }
     setParsedRows(rows);
     setError("");
     setStep("preview");
@@ -176,7 +179,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
       setResult({ ...res, skipped: res.skippedRows.length });
       setStep("done");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Import failed");
+      setError(err instanceof Error ? err.message : t("errorImportFailed"));
     } finally {
       setLoading(false);
     }
@@ -193,7 +196,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
       >
         <DialogHeader>
           <DialogTitle style={{ color: "var(--color-ft-text)" }}>
-            Import CSV
+            {t("title")}
           </DialogTitle>
         </DialogHeader>
 
@@ -207,10 +210,10 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
             >
               <Upload className="h-8 w-8" style={{ color: "var(--color-ft-text-3)" }} />
               <p className="text-sm font-medium" style={{ color: "var(--color-ft-text-2)" }}>
-                Click to upload CSV file
+                {t("uploadPrompt")}
               </p>
               <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-                Exported from any bank
+                {t("uploadHint")}
               </p>
               <input
                 ref={fileRef}
@@ -228,18 +231,18 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
         {step === "map" && (
           <div className="space-y-4 mt-2">
             <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-              {rawRows.length} rows detected. Map columns below.
+              {t("rowsDetected", { count: rawRows.length })}
             </p>
 
             {/* Account */}
             <div className="space-y-1.5">
-              <Label style={{ color: "var(--color-ft-text-2)" }}>Account</Label>
+              <Label style={{ color: "var(--color-ft-text-2)" }}>{t("labelAccount")}</Label>
               <Select value={accountId} onValueChange={(v) => { if (v) setAccountId(v); }}>
                 <SelectTrigger className="w-full" style={inputStyle}>
                   <SelectValue>
                     {accountId && accounts
-                      ? (accounts.find((a: Doc<"fintrack_accounts">) => a._id === accountId)?.name ?? "Select account")
-                      : "Select account"}
+                      ? (accounts.find((a: Doc<"fintrack_accounts">) => a._id === accountId)?.name ?? t("selectAccount"))
+                      : t("selectAccount")}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -252,18 +255,18 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
 
             {/* Column mapping */}
             {[
-              { label: "Date column", value: colDate, set: setColDate },
-              { label: "Description column", value: colDesc, set: setColDesc },
-              { label: "Amount column", value: colAmount, set: setColAmount },
-            ].map(({ label, value, set }) => (
-              <div key={label} className="space-y-1.5">
-                <Label style={{ color: "var(--color-ft-text-2)" }}>{label}</Label>
+              { labelKey: "labelDateCol" as const, value: colDate, set: setColDate },
+              { labelKey: "labelDescCol" as const, value: colDesc, set: setColDesc },
+              { labelKey: "labelAmountCol" as const, value: colAmount, set: setColAmount },
+            ].map(({ labelKey, value, set }) => (
+              <div key={labelKey} className="space-y-1.5">
+                <Label style={{ color: "var(--color-ft-text-2)" }}>{t(labelKey)}</Label>
                 <Select value={value} onValueChange={(v) => { if (v) set(v); }}>
                   <SelectTrigger className="w-full" style={inputStyle}>
                     <SelectValue>
                       {value !== "" && Number(value) >= 0 && headers[Number(value)]
                         ? headers[Number(value)]
-                        : "Select column"}
+                        : t("selectColumn")}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -277,15 +280,15 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
 
             {/* Date format */}
             <div className="space-y-1.5">
-              <Label style={{ color: "var(--color-ft-text-2)" }}>Date format</Label>
+              <Label style={{ color: "var(--color-ft-text-2)" }}>{t("labelDateFormat")}</Label>
               <Select value={dateFormat} onValueChange={(v) => setDateFormat(v as DateFormat)}>
                 <SelectTrigger className="w-full" style={inputStyle}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="MM/DD/YYYY">MM/DD/YYYY (US)</SelectItem>
-                  <SelectItem value="DD/MM/YYYY">DD/MM/YYYY (Europe / LATAM)</SelectItem>
-                  <SelectItem value="YYYY-MM-DD">YYYY-MM-DD (ISO)</SelectItem>
+                  <SelectItem value="MM/DD/YYYY">{t("dateFormatUS")}</SelectItem>
+                  <SelectItem value="DD/MM/YYYY">{t("dateFormatLatam")}</SelectItem>
+                  <SelectItem value="YYYY-MM-DD">{t("dateFormatISO")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -299,7 +302,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                 className="rounded"
               />
               <span className="text-sm" style={{ color: "var(--color-ft-text-2)" }}>
-                Invert amount sign (if expenses show as positive)
+                {t("invertSign")}
               </span>
             </label>
 
@@ -307,10 +310,10 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setStep("upload")} style={{ borderColor: "var(--color-ft-border)", color: "var(--color-ft-text-2)" }}>
-                Back
+                {tc("back")}
               </Button>
               <Button onClick={handleMapConfirm} style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18" }}>
-                Preview
+                {t("btnPreview")}
               </Button>
             </DialogFooter>
           </div>
@@ -320,13 +323,13 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
         {step === "preview" && (
           <div className="space-y-4 mt-2">
             <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-              Previewing first 5 of {parsedRows.length} rows
+              {t("previewingRows", { count: parsedRows.length })}
             </p>
             <div className="rounded-lg border overflow-hidden" style={{ borderColor: "var(--color-ft-border)" }}>
               <table className="w-full text-xs">
                 <thead>
                   <tr style={{ backgroundColor: "var(--color-ft-surface-2)" }}>
-                    {["Date", "Description", "Amount", "Type"].map((h) => (
+                    {[t("colDate"), t("colDescription"), t("colAmount"), t("colType")].map((h) => (
                       <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: "var(--color-ft-text-3)" }}>
                         {h}
                       </th>
@@ -341,7 +344,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                       <td className="px-3 py-2 font-mono" style={{ color: row.type === "income" ? "var(--color-ft-good)" : "var(--color-ft-bad)" }}>
                         {row.type === "expense" ? "-" : "+"}${(row.amountCents / 100).toFixed(2)}
                       </td>
-                      <td className="px-3 py-2" style={{ color: "var(--color-ft-text-3)" }}>{row.type}</td>
+                      <td className="px-3 py-2" style={{ color: "var(--color-ft-text-3)" }}>{row.type === "income" ? t("typeIncome") : t("typeExpense")}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -352,14 +355,14 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
 
             <DialogFooter>
               <Button variant="outline" onClick={() => setStep("map")} style={{ borderColor: "var(--color-ft-border)", color: "var(--color-ft-text-2)" }}>
-                Back
+                {tc("back")}
               </Button>
               <Button
                 onClick={handleImport}
                 disabled={loading}
                 style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18" }}
               >
-                {loading ? `Importing…` : `Import ${parsedRows.length} rows`}
+                {loading ? t("importing") : t("importRows", { count: parsedRows.length })}
               </Button>
             </DialogFooter>
           </div>
@@ -375,15 +378,15 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                 : <CheckCircle className="h-9 w-9" style={{ color: "var(--color-ft-good)" }} />
               }
               <p className="font-semibold" style={{ color: "var(--color-ft-text)" }}>
-                {result.partialError ? "Partial import" : "Import complete"}
+                {result.partialError ? t("partialImport") : t("importComplete")}
               </p>
               <div className="flex gap-4 text-sm">
                 <span style={{ color: "var(--color-ft-good)" }}>
-                  ✓ {result.imported} imported
+                  {t("importedCount", { count: result.imported })}
                 </span>
                 {result.skipped > 0 && (
                   <span style={{ color: "var(--color-ft-warn)" }}>
-                    ⚠ {result.skipped} duplicates skipped
+                    {t("duplicatesSkipped", { count: result.skipped })}
                   </span>
                 )}
               </div>
@@ -401,7 +404,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
               >
                 <p className="font-medium">{result.partialError}</p>
                 <p style={{ color: "var(--color-ft-text-3)" }}>
-                  You can re-run the import safely — already-imported rows will be skipped automatically.
+                  {t("rerunSafe")}
                 </p>
               </div>
             )}
@@ -427,7 +430,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                     <table className="w-full text-xs">
                       <thead className="sticky top-0">
                         <tr style={{ backgroundColor: "var(--color-ft-surface-2)" }}>
-                          {["Date", "Description", "Amount"].map((h) => (
+                          {[t("colDate"), t("colDescription"), t("colAmount")].map((h) => (
                             <th key={h} className="px-3 py-2 text-left font-medium" style={{ color: "var(--color-ft-text-3)" }}>
                               {h}
                             </th>
@@ -460,15 +463,15 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                   {transfers.length > 0 && (
                     <SkippedTable
                       rows={transfers}
-                      label={`↔ ${transfers.length} transfer match${transfers.length > 1 ? "es" : ""} skipped`}
-                      note="These deposits/withdrawals match a manual transfer you already recorded — skipped to avoid double-counting."
+                      label={t("transferMatchesSkipped", { count: transfers.length })}
+                      note={t("transferMatchNote")}
                     />
                   )}
                   {duplicates.length > 0 && (
                     <SkippedTable
                       rows={duplicates}
-                      label={`⚠ ${duplicates.length} duplicate${duplicates.length > 1 ? "s" : ""} skipped`}
-                      note="These rows were already imported in a previous CSV — skipped automatically."
+                      label={t("duplicatesSkipped", { count: duplicates.length })}
+                      note={t("duplicateNote")}
                     />
                   )}
                 </div>
@@ -480,7 +483,7 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
                 onClick={() => handleOpenChange(false)}
                 style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18" }}
               >
-                Done
+                {t("done")}
               </Button>
             </DialogFooter>
           </div>

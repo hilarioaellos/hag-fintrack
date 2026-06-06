@@ -279,7 +279,7 @@
     "severity": {
       "urgent": "Urgente",
       "warning": "Advertencia",
-      "info": "Info"
+      "info": "Información"
     }
   },
   "reports": {
@@ -323,6 +323,50 @@
       "discrepancy": "Discrepancia",
       "pending": "Pendiente"
     }
+  },
+  "csvImport": {
+    "title": "Importar CSV",
+    "uploadPrompt": "Haz clic para subir archivo CSV",
+    "uploadHint": "Exportado de cualquier banco",
+    "errorMinRows": "El CSV debe tener al menos una fila de encabezado y una de datos",
+    "errorParse": "Error al leer el CSV",
+    "rowsDetected": "{count} filas detectadas. Mapea las columnas a continuación.",
+    "labelAccount": "Cuenta",
+    "selectAccount": "Seleccionar cuenta",
+    "labelDateCol": "Columna de fecha",
+    "labelDescCol": "Columna de descripción",
+    "labelAmountCol": "Columna de monto",
+    "selectColumn": "Seleccionar columna",
+    "labelDateFormat": "Formato de fecha",
+    "dateFormatUS": "MM/DD/YYYY (EE.UU.)",
+    "dateFormatLatam": "DD/MM/YYYY (Europa / LATAM)",
+    "dateFormatISO": "YYYY-MM-DD (ISO)",
+    "invertSign": "Invertir signo del monto (si los gastos aparecen como positivos)",
+    "errorSelectAccount": "Selecciona una cuenta",
+    "errorSelectDate": "Selecciona la columna de fecha",
+    "errorSelectDesc": "Selecciona la columna de descripción",
+    "errorSelectAmount": "Selecciona la columna de monto",
+    "errorNoValidRows": "No se encontraron filas válidas",
+    "errorImportFailed": "Error al importar",
+    "btnPreview": "Vista previa",
+    "previewingRows": "Mostrando las primeras 5 de {count} filas",
+    "colDate": "Fecha",
+    "colDescription": "Descripción",
+    "colAmount": "Monto",
+    "colType": "Tipo",
+    "typeIncome": "Ingreso",
+    "typeExpense": "Gasto",
+    "importRows": "Importar {count} filas",
+    "importing": "Importando…",
+    "partialImport": "Importación parcial",
+    "importComplete": "Importación completa",
+    "importedCount": "✓ {count} importadas",
+    "duplicatesSkipped": "⚠ {count} duplicados omitidos",
+    "rerunSafe": "Puedes volver a ejecutar la importación — las filas ya importadas se omitirán automáticamente.",
+    "transferMatchesSkipped": "↔ {count} transferencias coincidentes omitidas",
+    "transferMatchNote": "Estos depósitos/retiros coinciden con una transferencia manual ya registrada — omitidos para evitar doble conteo.",
+    "duplicateNote": "Estas filas ya fueron importadas en un CSV anterior — omitidas automáticamente.",
+    "done": "Listo"
   },
   "settings": {
     "title": "Configuración",
