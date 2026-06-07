@@ -11,6 +11,10 @@ import type { Doc } from "@convex-api/dataModel";
 
 export function AccountsList() {
   const accounts = useQuery(api.fintrack.accounts.list);
+  const cards = useQuery(api.fintrack.cards.list);
+  const cardByAccountId = new Map(
+    (cards ?? []).map((c: Doc<"fintrack_credit_cards"> & { account: Doc<"fintrack_accounts"> | null }) => [c.accountId as string, c])
+  );
   const t = useTranslations("accounts");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -79,7 +83,7 @@ export function AccountsList() {
       {accounts && accounts.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {accounts.map((account: Doc<"fintrack_accounts">) => (
-            <AccountCard key={account._id} account={account} />
+            <AccountCard key={account._id} account={account} card={cardByAccountId.get(account._id)} />
           ))}
         </div>
       )}

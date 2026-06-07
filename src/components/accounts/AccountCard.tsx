@@ -9,6 +9,7 @@ import type { Doc } from "@convex-api/dataModel";
 import { AccountFormDialog } from "./AccountFormDialog";
 
 type Account = Doc<"fintrack_accounts">;
+type CreditCard = Doc<"fintrack_credit_cards">;
 
 const TYPE_COLORS: Record<Account["type"], string> = {
   checking:   "var(--color-ft-primary)",
@@ -18,7 +19,7 @@ const TYPE_COLORS: Record<Account["type"], string> = {
   cash:       "var(--color-ft-text-2)",
 };
 
-export function AccountCard({ account }: { account: Account }) {
+export function AccountCard({ account, card }: { account: Account; card?: CreditCard }) {
   const t = useTranslations("accounts");
   const archive = useMutation(api.fintrack.accounts.archive);
   const [editOpen, setEditOpen] = useState(false);
@@ -128,6 +129,7 @@ export function AccountCard({ account }: { account: Account }) {
         open={editOpen}
         onOpenChange={setEditOpen}
         account={account}
+        card={card}
       />
     </>
   );

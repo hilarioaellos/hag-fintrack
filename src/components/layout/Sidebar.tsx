@@ -12,7 +12,6 @@ import {
   TrendingDown,
   TrendingUp,
   RefreshCw,
-  CreditCard,
   BarChart3,
   Scale,
   Settings,
@@ -27,7 +26,6 @@ const NAV_MAIN = [
   { href: "/debts", icon: TrendingDown, key: "debts" },
   { href: "/receivables", icon: TrendingUp, key: "receivables" },
   { href: "/subscriptions", icon: RefreshCw, key: "subscriptions" },
-  { href: "/cards", icon: CreditCard, key: "cards" },
   { href: "/reports", icon: BarChart3, key: "reports" },
   { href: "/reconciliation", icon: Scale, key: "reconciliation" },
 ] as const;

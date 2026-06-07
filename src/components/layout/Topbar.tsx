@@ -11,7 +11,6 @@ type NavKey =
   | "transactions"
   | "budget"
   | "debts"
-  | "cards"
   | "reports"
   | "reconciliation"
   | "settings";
@@ -22,7 +21,6 @@ const ROUTES: [string, NavKey][] = [
   ["/transactions", "transactions"],
   ["/budget", "budget"],
   ["/debts", "debts"],
-  ["/cards", "cards"],
   ["/reports", "reports"],
   ["/reconciliation", "reconciliation"],
   ["/settings", "settings"],
