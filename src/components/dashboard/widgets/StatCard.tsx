@@ -5,11 +5,13 @@ export function StatCard({
   valueCents,
   color,
   currency = "USD",
+  note,
 }: {
   label: string;
   valueCents: number;
   color: string;
   currency?: string;
+  note?: string;
 }) {
   return (
     <div
@@ -28,10 +30,17 @@ export function StatCard({
       <p className="mt-2 text-2xl font-bold ft-num" style={{ color }}>
         {formatMoney(valueCents, currency)}
       </p>
-      <div
-        className="mt-3 h-0.5 w-8 rounded-full"
-        style={{ backgroundColor: color, opacity: 0.6 }}
-      />
+      <div className="mt-3 flex items-center gap-2">
+        <div
+          className="h-0.5 w-8 rounded-full"
+          style={{ backgroundColor: color, opacity: 0.6 }}
+        />
+        {note && (
+          <span className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+            {note}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

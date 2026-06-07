@@ -21,6 +21,7 @@ import { useTranslations } from "next-intl";
 import { SortableWidget } from "./SortableWidget";
 import { StatCard } from "./widgets/StatCard";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
+import { MonthNav } from "@/components/budget/MonthNav";
 
 type WidgetId = "net-worth" | "income" | "expenses" | "cashflow";
 
@@ -44,10 +45,12 @@ export function WidgetGrid() {
   })();
 
   const now = new Date();
+  const [period, setPeriod] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
+
   const netWorthCents = useQuery(api.fintrack.accounts.netWorthCents, { currencyCode: effectiveCurrency }) ?? 0;
   const stats = useQuery(api.fintrack.transactions.monthlyStats, {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
+    year: period.year,
+    month: period.month,
     currencyCode: effectiveCurrency,
   }) ?? { incomeCents: 0, expensesCents: 0, cashflowCents: 0 };
 
@@ -74,7 +77,7 @@ export function WidgetGrid() {
 
   const WIDGETS: Record<WidgetId, React.ReactNode> = {
     "net-worth": (
-      <StatCard label={t("netWorth")} valueCents={netWorthCents} color="var(--color-ft-primary)" currency={effectiveCurrency} />
+      <StatCard label={t("netWorth")} valueCents={netWorthCents} color="var(--color-ft-primary)" currency={effectiveCurrency} note={t("currentBalance")} />
     ),
     income: (
       <StatCard label={t("monthlyIncome")} valueCents={stats.incomeCents} color="var(--color-ft-good)" currency={effectiveCurrency} />
@@ -89,7 +92,12 @@ export function WidgetGrid() {
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <MonthNav
+          year={period.year}
+          month={period.month}
+          onChange={(y, m) => setPeriod({ year: y, month: m })}
+        />
         <CurrencySelector value={effectiveCurrency} currencies={currencies} onChange={setSelected} />
       </div>
       <DndContext

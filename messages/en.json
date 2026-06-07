@@ -44,7 +44,8 @@
     "monthlyIncome": "Monthly Income",
     "monthlyExpenses": "Monthly Expenses",
     "cashFlow": "Cash Flow",
-    "recentTransactions": "Recent Transactions"
+    "recentTransactions": "Recent Transactions",
+    "currentBalance": "current balance"
   },
   "accounts": {
     "title": "Accounts",

@@ -44,7 +44,8 @@
     "monthlyIncome": "Ingresos del Mes",
     "monthlyExpenses": "Gastos del Mes",
     "cashFlow": "Flujo de Caja",
-    "recentTransactions": "Transacciones Recientes"
+    "recentTransactions": "Transacciones Recientes",
+    "currentBalance": "saldo actual"
   },
   "accounts": {
     "title": "Cuentas",
