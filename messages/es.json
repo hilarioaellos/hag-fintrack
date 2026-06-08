@@ -65,7 +65,12 @@
       "investment": "Inversión",
       "credit": "Crédito",
       "cash": "Efectivo"
-    }
+    },
+    "archive": "Archivar",
+    "clearTransactions": "Limpiar transacciones",
+    "clearConfirm": "¿Borrar todas las transacciones de esta cuenta?",
+    "clearConfirmYes": "Sí, borrar",
+    "clearConfirmNo": "Cancelar"
   },
   "transactions": {
     "title": "Transacciones",

@@ -65,7 +65,12 @@
       "investment": "Investment",
       "credit": "Credit",
       "cash": "Cash"
-    }
+    },
+    "archive": "Archive",
+    "clearTransactions": "Clear transactions",
+    "clearConfirm": "Delete all transactions from this account?",
+    "clearConfirmYes": "Yes, delete",
+    "clearConfirmNo": "Cancel"
   },
   "transactions": {
     "title": "Transactions",

@@ -4,7 +4,7 @@ import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { MoreHorizontal, Pencil, Archive } from "lucide-react";
+import { MoreHorizontal, Pencil, Archive, Trash2 } from "lucide-react";
 import type { Doc } from "@convex-api/dataModel";
 import { AccountFormDialog } from "./AccountFormDialog";
 
@@ -22,8 +22,11 @@ const TYPE_COLORS: Record<Account["type"], string> = {
 export function AccountCard({ account, card }: { account: Account; card?: CreditCard }) {
   const t = useTranslations("accounts");
   const archive = useMutation(api.fintrack.accounts.archive);
+  const clearTxs = useMutation(api.fintrack.transactions.clearByAccount);
   const [editOpen, setEditOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const color = TYPE_COLORS[account.type];
   const isCredit = account.type === "credit";
@@ -34,6 +37,17 @@ export function AccountCard({ account, card }: { account: Account; card?: Credit
   const handleArchive = async () => {
     setMenuOpen(false);
     await archive({ id: account._id });
+  };
+
+  const handleClearTxs = async () => {
+    setClearing(true);
+    try {
+      await clearTxs({ accountId: account._id });
+    } finally {
+      setClearing(false);
+      setConfirmClear(false);
+      setMenuOpen(false);
+    }
   };
 
   return (
@@ -95,8 +109,42 @@ export function AccountCard({ account, card }: { account: Account; card?: Credit
                     className="flex w-full items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-[var(--color-ft-surface)]"
                     style={{ color: "var(--color-ft-bad)" }}
                   >
-                    <Archive className="h-3 w-3" /> Archive
+                    <Archive className="h-3 w-3" /> {t("archive")}
                   </button>
+
+                  {/* Clear transactions — with inline confirm */}
+                  {!confirmClear ? (
+                    <button
+                      onClick={() => setConfirmClear(true)}
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-xs transition-colors hover:bg-[var(--color-ft-surface)]"
+                      style={{ color: "var(--color-ft-bad)" }}
+                    >
+                      <Trash2 className="h-3 w-3" /> {t("clearTransactions")}
+                    </button>
+                  ) : (
+                    <div className="px-3 py-2 space-y-1.5 border-t" style={{ borderColor: "var(--color-ft-border)" }}>
+                      <p className="text-[10px]" style={{ color: "var(--color-ft-text-3)" }}>
+                        {t("clearConfirm")}
+                      </p>
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={handleClearTxs}
+                          disabled={clearing}
+                          className="flex-1 py-1 text-[10px] font-medium rounded"
+                          style={{ backgroundColor: "var(--color-ft-bad)", color: "#fff", opacity: clearing ? 0.6 : 1 }}
+                        >
+                          {clearing ? "…" : t("clearConfirmYes")}
+                        </button>
+                        <button
+                          onClick={() => setConfirmClear(false)}
+                          className="flex-1 py-1 text-[10px] rounded"
+                          style={{ backgroundColor: "var(--color-ft-surface)", color: "var(--color-ft-text-2)", border: "1px solid var(--color-ft-border)" }}
+                        >
+                          {t("clearConfirmNo")}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </>
             )}
