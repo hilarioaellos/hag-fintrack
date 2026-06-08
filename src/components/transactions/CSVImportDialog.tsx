@@ -70,6 +70,80 @@ interface CSVProfile {
   skipDescriptions: string[];
 }
 
+// ─── Keyword rules — fallback when no history exists ─────────────────────────
+// Each entry maps one or more lowercase keywords to a category name.
+// Evaluated in order; first match wins.
+
+const KEYWORD_RULES: Array<{ keywords: string[]; categoryName: string }> = [
+  // Income
+  { keywords: ["zelle payment from iris"],          categoryName: "IRIS" },
+  { keywords: ["zelle payment from hag partner"],   categoryName: "Business Income" },
+  { keywords: ["irs  treas 310", "irs treas 310"],  categoryName: "Other Income" },
+  { keywords: ["applecard gsbank refund"],           categoryName: "Other Income" },
+  // Mortgage / Rent
+  { keywords: ["pennymac"],                          categoryName: "Mortgage/Rent" },
+  { keywords: ["delray trails"],                     categoryName: "Mortgage/Rent" },
+  // Utilities
+  { keywords: ["fpl direct"],                        categoryName: "Utilities" },
+  { keywords: ["pbc water"],                         categoryName: "Utilities" },
+  { keywords: ["sunstrong"],                         categoryName: "Utilities" },
+  { keywords: ["tmobile", "t-mobile"],               categoryName: "Utilities" },
+  { keywords: ["xfinity"],                           categoryName: "Utilities" },
+  // Transportation
+  { keywords: ["vw credit"],                         categoryName: "Transportation" },
+  { keywords: ["online payment", "to auto loan"],    categoryName: "Transportation" },
+  { keywords: ["sst 833"],                           categoryName: "Transportation" },
+  { keywords: ["costco gas"],                        categoryName: "Transportation" },
+  { keywords: ["exxon"],                             categoryName: "Transportation" },
+  { keywords: ["park mobile", "parking pay by"],     categoryName: "Transportation" },
+  { keywords: ["doral parking", "one parking", "coral gables paybypho"], categoryName: "Transportation" },
+  // Groceries
+  { keywords: ["publix"],                            categoryName: "Groceries" },
+  { keywords: ["wal-mart", "wm supercenter", "walmart+"], categoryName: "Groceries" },
+  { keywords: ["winndixie"],                         categoryName: "Groceries" },
+  { keywords: ["martinez distributors"],             categoryName: "Groceries" },
+  // Restaurants
+  { keywords: ["china gardens"],                     categoryName: "Restaurants" },
+  { keywords: ["la pradera"],                        categoryName: "Restaurants" },
+  { keywords: ["sicilian oven"],                     categoryName: "Restaurants" },
+  { keywords: ["eataly"],                            categoryName: "Restaurants" },
+  // Shopping
+  { keywords: ["macys"],                             categoryName: "Shopping" },
+  { keywords: ["sleeplay"],                          categoryName: "Shopping" },
+  { keywords: ["neighbors nook"],                    categoryName: "Shopping" },
+  // Technology
+  { keywords: ["openai"],                            categoryName: "Technology" },
+  { keywords: ["google one", "google *google one"],  categoryName: "Technology" },
+  { keywords: ["godaddy"],                           categoryName: "Technology" },
+  // Healthcare
+  { keywords: ["rayus radiology"],                   categoryName: "Healthcare" },
+  // Home
+  { keywords: ["ramon fumigacion"],                  categoryName: "Home" },
+  // Finances (fees / charges)
+  { keywords: ["monthly service fee"],               categoryName: "Finances" },
+  { keywords: ["overdraft fee"],                     categoryName: "Finances" },
+  { keywords: ["late fee"],                          categoryName: "Finances" },
+  // Other
+  { keywords: ["gov*palm beach citation"],           categoryName: "Other" },
+  { keywords: ["irs usataxpymt", "irs  usataxpymt"], categoryName: "Other" },
+  { keywords: ["fondo rotatorio"],                   categoryName: "Other" },
+  { keywords: ["usps po"],                           categoryName: "Other" },
+];
+
+function suggestByKeyword(
+  description: string,
+  categories: Array<{ _id: string; name: string }>
+): string {
+  const lower = description.toLowerCase();
+  for (const rule of KEYWORD_RULES) {
+    if (rule.keywords.some((kw) => lower.includes(kw))) {
+      const cat = categories.find((c) => c.name === rule.categoryName);
+      if (cat) return cat._id;
+    }
+  }
+  return "";
+}
+
 // ─── Bank detection ───────────────────────────────────────────────────────────
 
 function idx(headers: string[], ...keywords: string[]): number {
@@ -367,14 +441,17 @@ export function CSVImportDialog({ open, onOpenChange }: Props) {
     if (rows.length === 0) { setError(t("errorNoValidRows")); return; }
     setParsedRows(rows);
 
-    // Build initial categoryMap from suggestions
+    // Build initial categoryMap: history first, keyword rules as fallback
     const suggestions = categorySuggestions ?? {};
+    const cats = categories ?? [];
     const initMap: Record<string, string> = {};
     for (const row of rows) {
+      if (row.description in initMap) continue;
       const key = row.description.trim().toLowerCase();
-      if (!(row.description in initMap)) {
-        initMap[row.description] = suggestions[key] ?? "";
-      }
+      initMap[row.description] =
+        suggestions[key] ||
+        suggestByKeyword(row.description, cats) ||
+        "";
     }
     setCategoryMap(initMap);
     setError("");
