@@ -48,9 +48,9 @@ export function BudgetFormDialog({ open, onOpenChange, year, month, budget, budg
     (c: Doc<"fintrack_categories">) =>
       isEdit ? true : !budgetedCategoryIds.has(c._id)
   );
-  const selectedCat = availableCategories.find((c: Doc<"fintrack_categories">) => c._id === categoryId);
 
   const [categoryId, setCategoryId] = useState(budget?.categoryId ?? "");
+  const selectedCat = availableCategories.find((c: Doc<"fintrack_categories">) => c._id === categoryId);
   const [amount, setAmount] = useState(budget ? String(budget.amountPlannedCents / 100) : "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

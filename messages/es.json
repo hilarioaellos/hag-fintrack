@@ -302,6 +302,7 @@
     "netWorth": "Patrimonio Neto",
     "accounts": "cuentas",
     "noData": "Sin datos para este período",
+    "chartError": "No disponible",
     "last6Months": "Últimos 6 meses",
     "day": "Día {day}"
   },

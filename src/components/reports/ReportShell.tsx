@@ -2,9 +2,32 @@
 import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, Component, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { CurrencySelector } from "@/components/ui/CurrencySelector";
+
+class ChartErrorBoundary extends Component<
+  { children: ReactNode; fallback: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; fallback: string }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <p className="text-xs text-center py-8" style={{ color: "var(--color-ft-text-3)" }}>
+          {this.props.fallback}
+        </p>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const IncomeExpensesChart = dynamic(
   () => import("./IncomeExpensesChart").then((m) => ({ default: m.IncomeExpensesChart })),
@@ -60,19 +83,27 @@ export function ReportShell() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <ReportCard title={t("incomeVsExpenses")}>
-          <IncomeExpensesChart currencyCode={effectiveCurrency} />
+          <ChartErrorBoundary fallback={t("chartError")}>
+            <IncomeExpensesChart currencyCode={effectiveCurrency} />
+          </ChartErrorBoundary>
         </ReportCard>
 
         <ReportCard title={t("byCategory")}>
-          <CategoryPieChart currencyCode={effectiveCurrency} />
+          <ChartErrorBoundary fallback={t("chartError")}>
+            <CategoryPieChart currencyCode={effectiveCurrency} />
+          </ChartErrorBoundary>
         </ReportCard>
 
         <ReportCard title={t("cashFlow")}>
-          <CashFlowChart currencyCode={effectiveCurrency} />
+          <ChartErrorBoundary fallback={t("chartError")}>
+            <CashFlowChart currencyCode={effectiveCurrency} />
+          </ChartErrorBoundary>
         </ReportCard>
 
         <ReportCard title={t("netWorthOverTime")}>
-          <NetWorthCard currencyCode={effectiveCurrency} />
+          <ChartErrorBoundary fallback={t("chartError")}>
+            <NetWorthCard currencyCode={effectiveCurrency} />
+          </ChartErrorBoundary>
         </ReportCard>
       </div>
     </div>
