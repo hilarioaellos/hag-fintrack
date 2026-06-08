@@ -386,6 +386,14 @@
     "transferMatchesSkipped": "↔ {count} transfer matches skipped",
     "transferMatchNote": "These deposits/withdrawals match a manual transfer you already recorded — skipped to avoid double-counting.",
     "duplicateNote": "These rows were already imported in a previous CSV — skipped automatically.",
+    "categorizeHint": "{total} transactions · {groups} unique descriptions",
+    "categorized": "categorized",
+    "colDescription": "Description",
+    "colCategory": "Category",
+    "noCategory": "No category",
+    "transaction": "transaction",
+    "transactions": "transactions",
+    "typeMixed": "mixed",
     "done": "Done"
   },
   "settings": {

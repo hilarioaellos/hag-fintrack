@@ -386,6 +386,14 @@
     "transferMatchesSkipped": "↔ {count} transferencias coincidentes omitidas",
     "transferMatchNote": "Estos depósitos/retiros coinciden con una transferencia manual ya registrada — omitidos para evitar doble conteo.",
     "duplicateNote": "Estas filas ya fueron importadas en un CSV anterior — omitidas automáticamente.",
+    "categorizeHint": "{total} transacciones · {groups} descripciones únicas",
+    "categorized": "categorizadas",
+    "colDescription": "Descripción",
+    "colCategory": "Categoría",
+    "noCategory": "Sin categoría",
+    "transaction": "transacción",
+    "transactions": "transacciones",
+    "typeMixed": "mixto",
     "done": "Listo"
   },
   "settings": {
