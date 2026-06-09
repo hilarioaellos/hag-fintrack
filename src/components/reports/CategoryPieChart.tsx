@@ -23,8 +23,9 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const locale = useLocale();
   const [{ year, month }, setPeriod] = useState(currentYearMonth);
   const [selectedCat, setSelectedCat] = useState<CatRow | null>(null);
+  const [txType, setTxType] = useState<"expense" | "income">("expense");
 
-  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode });
+  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType });
 
   useEffect(() => { setSelectedCat(null); }, [currencyCode]);
 
@@ -53,6 +54,11 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
     setSelectedCat(null);
   };
 
+  const handleTypeChange = (t: "expense" | "income") => {
+    setTxType(t);
+    setSelectedCat(null);
+  };
+
   const toggleCat = (cat: CatRow) =>
     setSelectedCat((prev) => (prev?.categoryId === cat.categoryId ? null : cat));
 
@@ -62,6 +68,30 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
 
   return (
     <div className="space-y-3">
+      {/* Expense / Income toggle */}
+      <div className="flex gap-1">
+        <button
+          onClick={() => handleTypeChange("expense")}
+          className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+          style={{
+            backgroundColor: txType === "expense" ? "var(--color-ft-bad)" : "var(--color-ft-surface-2)",
+            color: txType === "expense" ? "#fff" : "var(--color-ft-text-3)",
+          }}
+        >
+          {t("expenses")}
+        </button>
+        <button
+          onClick={() => handleTypeChange("income")}
+          className="px-3 py-1 rounded-lg text-xs font-medium transition-colors"
+          style={{
+            backgroundColor: txType === "income" ? "var(--color-ft-good)" : "var(--color-ft-surface-2)",
+            color: txType === "income" ? "#000" : "var(--color-ft-text-3)",
+          }}
+        >
+          {t("income")}
+        </button>
+      </div>
+
       <MonthNav year={year} month={month} onChange={handlePeriodChange} />
 
       {data === undefined ? (
