@@ -38,8 +38,12 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const accounts = useQuery(selectedCat ? api.fintrack.accounts.list : "skip");
 
   const drillTxs = (monthTxs ?? []).filter(
-    (tx: Doc<"fintrack_transactions">) =>
-      tx.categoryId === selectedCat?.categoryId && tx.currencyCode === currencyCode
+    (tx: Doc<"fintrack_transactions">) => {
+      if (selectedCat?.categoryId === "__none__") {
+        return !tx.categoryId && tx.type === "expense" && tx.currencyCode === currencyCode;
+      }
+      return tx.categoryId === selectedCat?.categoryId && tx.currencyCode === currencyCode;
+    }
   );
 
   const total = (data ?? []).reduce((s: number, d: CatRow) => s + d.totalCents, 0);
@@ -51,6 +55,10 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
 
   const toggleCat = (cat: CatRow) =>
     setSelectedCat((prev) => (prev?.categoryId === cat.categoryId ? null : cat));
+
+  function catLabel(d: CatRow) {
+    return d.categoryId === "__none__" ? t("uncategorized") : `${d.icon} ${d.name}`;
+  }
 
   return (
     <div className="space-y-3">
@@ -89,6 +97,10 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
                 </Pie>
                 <Tooltip
                   formatter={(value: number) => [formatMoney(value, currencyCode)]}
+                  labelFormatter={(_, payload) => {
+                    const d = payload?.[0]?.payload as CatRow | undefined;
+                    return d ? catLabel(d) : "";
+                  }}
                   contentStyle={{
                     backgroundColor: "var(--color-ft-surface-2)",
                     border: "1px solid var(--color-ft-border)",
@@ -121,7 +133,7 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
                         style={{ backgroundColor: d.color ?? "#94a3b8" }}
                       />
                       <span className="text-xs truncate" style={{ color: "var(--color-ft-text-2)" }}>
-                        {d.icon} {d.name}
+                        {catLabel(d)}
                       </span>
                     </div>
                     <span className="text-xs font-mono shrink-0" style={{ color: "var(--color-ft-text-3)" }}>
@@ -139,7 +151,6 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
               className="rounded-xl border mt-2"
               style={{ borderColor: "var(--color-ft-border)", backgroundColor: "var(--color-ft-surface-2)" }}
             >
-              {/* Header */}
               <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-ft-border)" }}>
                 <div className="flex items-center gap-2">
                   <span
@@ -147,7 +158,7 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
                     style={{ backgroundColor: selectedCat.color ?? "#94a3b8" }}
                   />
                   <span className="text-sm font-semibold" style={{ color: "var(--color-ft-text)" }}>
-                    {selectedCat.icon} {selectedCat.name}
+                    {catLabel(selectedCat)}
                   </span>
                   <span className="text-sm font-mono" style={{ color: "var(--color-ft-bad)" }}>
                     {formatMoney(selectedCat.totalCents, currencyCode)}
@@ -162,7 +173,6 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
                 </button>
               </div>
 
-              {/* Transaction list */}
               {monthTxs === undefined ? (
                 <div className="p-4 animate-pulse h-16 rounded-b-xl" style={{ backgroundColor: "var(--color-ft-surface-2)" }} />
               ) : drillTxs.length === 0 ? (

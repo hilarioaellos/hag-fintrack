@@ -318,7 +318,7 @@
     "incomeVsExpenses": "Income vs Expenses",
     "byCategory": "Expenses by Category",
     "netWorthOverTime": "Net Worth",
-    "cashFlow": "Daily Cash Flow",
+    "cashFlow": "Cash Flow",
     "income": "Income",
     "expenses": "Expenses",
     "netWorth": "Net Worth",
@@ -326,7 +326,18 @@
     "noData": "No data for this period",
     "chartError": "Not available",
     "last6Months": "Last 6 months",
-    "day": "Day {day}"
+    "day": "Day {day}",
+    "period3m": "3M",
+    "period6m": "6M",
+    "period12m": "12M",
+    "period24m": "24M",
+    "netSavings": "Net savings",
+    "savingRate": "{pct}% of income",
+    "granDaily": "Daily",
+    "granWeekly": "Weekly",
+    "granMonthly": "Monthly",
+    "week": "Wk {n}",
+    "uncategorized": "Uncategorized"
   },
   "reconciliation": {
     "title": "Reconciliation",

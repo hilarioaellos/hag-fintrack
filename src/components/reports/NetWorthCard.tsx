@@ -3,10 +3,14 @@ import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { formatMoney, formatMoneyCompact } from "@/lib/money";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
 } from "recharts";
+
+const LOOKBACKS = [3, 6, 12, 24] as const;
+type Lookback = (typeof LOOKBACKS)[number];
 
 function NetWorthTooltip({
   active, payload, currencyCode,
@@ -36,8 +40,10 @@ function NetWorthTooltip({
 
 export function NetWorthCard({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
+  const [lookback, setLookback] = useState<Lookback>(12);
+
   const snapshot = useQuery(api.fintrack.reports.netWorthSnapshot, { currencyCode });
-  const history = useQuery(api.fintrack.reports.netWorthHistory, { currencyCode });
+  const history = useQuery(api.fintrack.reports.netWorthHistory, { currencyCode, lookbackMonths: lookback });
 
   const isLoading = snapshot === undefined || history === undefined;
 
@@ -51,18 +57,35 @@ export function NetWorthCard({ currencyCode }: { currencyCode: string }) {
   const hasHistory = history.length > 1;
 
   return (
-    <div className="space-y-4">
-      {/* Snapshot row */}
-      <div className="flex items-baseline gap-3">
-        <p
-          className="text-3xl font-bold ft-num"
-          style={{ color: isPositive ? "var(--color-ft-good)" : "var(--color-ft-bad)" }}
-        >
-          {isPositive ? "" : "-"}{formatMoney(Math.abs(snapshot.totalCents), currencyCode)}
-        </p>
-        <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-          {snapshot.accountCount} {t("accounts")}
-        </p>
+    <div className="space-y-3">
+      {/* Snapshot + period selector row */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-baseline gap-2">
+          <p
+            className="text-2xl font-bold ft-num"
+            style={{ color: isPositive ? "var(--color-ft-good)" : "var(--color-ft-bad)" }}
+          >
+            {isPositive ? "" : "-"}{formatMoney(Math.abs(snapshot.totalCents), currencyCode)}
+          </p>
+          <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+            {snapshot.accountCount} {t("accounts")}
+          </p>
+        </div>
+        <div className="flex gap-1 shrink-0">
+          {LOOKBACKS.map((lb) => (
+            <button
+              key={lb}
+              onClick={() => setLookback(lb)}
+              className="px-2 py-1 rounded-lg text-xs font-medium transition-colors"
+              style={{
+                backgroundColor: lookback === lb ? "var(--color-ft-primary)" : "var(--color-ft-surface-2)",
+                color: lookback === lb ? "#000" : "var(--color-ft-text-3)",
+              }}
+            >
+              {t(`period${lb}m` as "period3m" | "period6m" | "period12m" | "period24m")}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Line chart */}
@@ -71,7 +94,7 @@ export function NetWorthCard({ currencyCode }: { currencyCode: string }) {
           {t("noData")}
         </p>
       ) : (
-        <ResponsiveContainer width="100%" height={180}>
+        <ResponsiveContainer width="100%" height={170}>
           <LineChart data={history} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
             <CartesianGrid
               strokeDasharray="3 3"

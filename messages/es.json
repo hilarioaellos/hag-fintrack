@@ -318,7 +318,7 @@
     "incomeVsExpenses": "Ingresos vs Gastos",
     "byCategory": "Gastos por Categoría",
     "netWorthOverTime": "Patrimonio Neto",
-    "cashFlow": "Flujo de Caja Diario",
+    "cashFlow": "Flujo de Caja",
     "income": "Ingresos",
     "expenses": "Gastos",
     "netWorth": "Patrimonio Neto",
@@ -326,7 +326,18 @@
     "noData": "Sin datos para este período",
     "chartError": "No disponible",
     "last6Months": "Últimos 6 meses",
-    "day": "Día {day}"
+    "day": "Día {day}",
+    "period3m": "3M",
+    "period6m": "6M",
+    "period12m": "12M",
+    "period24m": "24M",
+    "netSavings": "Ahorro neto",
+    "savingRate": "{pct}% del ingreso",
+    "granDaily": "Diario",
+    "granWeekly": "Semanal",
+    "granMonthly": "Mensual",
+    "week": "Sem {n}",
+    "uncategorized": "Sin categoría"
   },
   "reconciliation": {
     "title": "Conciliación",
