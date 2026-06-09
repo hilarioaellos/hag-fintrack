@@ -108,11 +108,11 @@ export function TransactionsList() {
     <div className="space-y-3">
       {/* ── Toolbar ── */}
       <div className="flex flex-wrap items-center gap-2 justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Account selector */}
           <Select value={filterAccountId} onValueChange={(v) => { if (v) setFilterAccountId(v); }}>
             <SelectTrigger
-              className="w-[180px] h-9 text-sm"
+              className="w-[160px] h-9 text-sm"
               style={{ backgroundColor: "var(--color-ft-surface)", borderColor: "var(--color-ft-border)", color: "var(--color-ft-text)" }}
             >
               <SelectValue>{selectedAccountName}</SelectValue>
@@ -121,6 +121,35 @@ export function TransactionsList() {
               <SelectItem value="all">{t("allAccounts")}</SelectItem>
               {accounts?.map((a: Doc<"fintrack_accounts">) => (
                 <SelectItem key={a._id} value={a._id}>{a.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Category selector */}
+          <Select value={filterCategoryId} onValueChange={(v) => { if (v) setFilterCategoryId(v); }}>
+            <SelectTrigger
+              className="w-[170px] h-9 text-sm"
+              style={{
+                backgroundColor: "var(--color-ft-surface)",
+                borderColor: filterCategoryId !== "all" ? "var(--color-ft-primary)" : "var(--color-ft-border)",
+                color: filterCategoryId !== "all" ? "var(--color-ft-primary)" : "var(--color-ft-text)",
+              }}
+            >
+              <SelectValue>
+                {filterCategoryId === "all"
+                  ? t("filterCategoryAll")
+                  : filterCategoryId === "__none__"
+                  ? t("uncategorized")
+                  : `${categoryMap[filterCategoryId]?.icon ?? ""} ${categoryMap[filterCategoryId]?.name ?? ""}`.trim()}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all" className="text-sm">{t("filterCategoryAll")}</SelectItem>
+              <SelectItem value="__none__" className="text-sm">— {t("uncategorized")}</SelectItem>
+              {(categories ?? []).map((c: Doc<"fintrack_categories">) => (
+                <SelectItem key={c._id} value={c._id} className="text-sm">
+                  {c.icon} {c.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -216,31 +245,6 @@ export function TransactionsList() {
                 onChange={(e) => setDateTo(e.target.value)}
                 style={inputStyle}
               />
-            </div>
-
-            {/* Category */}
-            <div className="space-y-1 sm:col-span-2 lg:col-span-2">
-              <p className="text-[10px] font-medium uppercase tracking-wide" style={{ color: "var(--color-ft-text-3)" }}>
-                {t("filterCategory")}
-              </p>
-              <Select value={filterCategoryId} onValueChange={(v) => { if (v) setFilterCategoryId(v); }}>
-                <SelectTrigger style={{ ...inputStyle, height: "2rem" }} className="w-full text-xs">
-                  <SelectValue>
-                    {filterCategoryId === "all"
-                      ? t("filterCategoryAll")
-                      : (categoryMap[filterCategoryId]?.name ?? t("uncategorized"))}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all" className="text-xs">{t("filterCategoryAll")}</SelectItem>
-                  <SelectItem value="__none__" className="text-xs">{t("uncategorized")}</SelectItem>
-                  {(categories ?? []).map((c: Doc<"fintrack_categories">) => (
-                    <SelectItem key={c._id} value={c._id} className="text-xs">
-                      {c.icon} {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
             {/* Amount min */}
