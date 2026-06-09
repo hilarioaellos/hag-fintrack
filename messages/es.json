@@ -84,6 +84,8 @@
     "filterDateTo": "Hasta",
     "filterAmountMin": "Monto mín.",
     "filterAmountMax": "Monto máx.",
+    "filterCategory": "Categoría",
+    "filterCategoryAll": "Todas las categorías",
     "clearFilters": "Limpiar filtros",
     "of": "de",
     "transactionsCount": "transacciones",

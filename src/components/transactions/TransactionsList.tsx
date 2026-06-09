@@ -39,6 +39,7 @@ export function TransactionsList() {
   const [search, setSearch] = useState("");
   const [amountMin, setAmountMin] = useState("");
   const [amountMax, setAmountMax] = useState("");
+  const [filterCategoryId, setFilterCategoryId] = useState("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   // ── Dialogs ───────────────────────────────────────────────────────────────
@@ -72,6 +73,8 @@ export function TransactionsList() {
     const max = amountMax ? parseFloat(amountMax) * 100 : null;
     return transactions.filter((tx: Transaction) => {
       if (q && !(tx.notes ?? "").toLowerCase().includes(q)) return false;
+      if (filterCategoryId === "__none__" && tx.categoryId) return false;
+      if (filterCategoryId !== "all" && filterCategoryId !== "__none__" && tx.categoryId !== filterCategoryId) return false;
       const abs = Math.abs(tx.amountCents);
       if (min !== null && abs < min) return false;
       if (max !== null && abs > max) return false;
@@ -79,11 +82,12 @@ export function TransactionsList() {
     });
   }, [transactions, search, amountMin, amountMax]);
 
-  const hasActiveFilters = dateFrom || dateTo || search || amountMin || amountMax;
+  const hasActiveFilters = !!(dateFrom || dateTo || search || amountMin || amountMax || filterCategoryId !== "all");
 
   const clearFilters = () => {
     setDateFrom(""); setDateTo("");
     setSearch(""); setAmountMin(""); setAmountMax("");
+    setFilterCategoryId("all");
   };
 
   const totals = (filtered ?? []).reduce(
@@ -164,7 +168,7 @@ export function TransactionsList() {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* Notes search */}
-            <div className="space-y-1 lg:col-span-2">
+            <div className="space-y-1 sm:col-span-2 lg:col-span-2">
               <p className="text-[10px] font-medium uppercase tracking-wide" style={{ color: "var(--color-ft-text-3)" }}>
                 {t("filterSearch")}
               </p>
@@ -212,6 +216,31 @@ export function TransactionsList() {
                 onChange={(e) => setDateTo(e.target.value)}
                 style={inputStyle}
               />
+            </div>
+
+            {/* Category */}
+            <div className="space-y-1 sm:col-span-2 lg:col-span-2">
+              <p className="text-[10px] font-medium uppercase tracking-wide" style={{ color: "var(--color-ft-text-3)" }}>
+                {t("filterCategory")}
+              </p>
+              <Select value={filterCategoryId} onValueChange={(v) => { if (v) setFilterCategoryId(v); }}>
+                <SelectTrigger style={{ ...inputStyle, height: "2rem" }} className="w-full text-xs">
+                  <SelectValue>
+                    {filterCategoryId === "all"
+                      ? t("filterCategoryAll")
+                      : (categoryMap[filterCategoryId]?.name ?? t("uncategorized"))}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-xs">{t("filterCategoryAll")}</SelectItem>
+                  <SelectItem value="__none__" className="text-xs">{t("uncategorized")}</SelectItem>
+                  {(categories ?? []).map((c: Doc<"fintrack_categories">) => (
+                    <SelectItem key={c._id} value={c._id} className="text-xs">
+                      {c.icon} {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Amount min */}

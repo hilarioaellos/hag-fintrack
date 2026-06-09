@@ -84,6 +84,8 @@
     "filterDateTo": "To",
     "filterAmountMin": "Min amount",
     "filterAmountMax": "Max amount",
+    "filterCategory": "Category",
+    "filterCategoryAll": "All categories",
     "clearFilters": "Clear filters",
     "of": "of",
     "transactionsCount": "transactions",
