@@ -10,25 +10,22 @@ import { KpiSummaryRow } from "./KpiSummaryRow";
 // Error boundary — shows clean fallback text, hides raw technical error from users
 class ChartErrorBoundary extends Component<
   { children: ReactNode; fallback: string },
-  { hasError: boolean }
+  { hasError: boolean; errorMsg: string }
 > {
   constructor(props: { children: ReactNode; fallback: string }) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, errorMsg: "" };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: unknown) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("[ChartErrorBoundary]", error);
-    }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static getDerivedStateFromError(error: any) {
+    const msg = error?.data ? JSON.stringify(error.data) : (error?.message ?? String(error));
+    return { hasError: true, errorMsg: msg };
   }
   render() {
     if (this.state.hasError) {
       return (
         <p className="text-xs text-center py-8" style={{ color: "var(--color-ft-text-3)" }}>
-          {this.props.fallback}
+          {this.props.fallback} — {this.state.errorMsg}
         </p>
       );
     }
