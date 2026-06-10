@@ -337,7 +337,13 @@
     "granWeekly": "Weekly",
     "granMonthly": "Monthly",
     "week": "Wk {n}",
-    "uncategorized": "Uncategorized"
+    "uncategorized": "Uncategorized",
+    "period1m": "1M",
+    "kpiIncome": "Total Income",
+    "kpiExpenses": "Total Expenses",
+    "kpiNetSavings": "Net Savings",
+    "kpiSavingsRate": "Savings Rate",
+    "categoryBreakdown": "Category Breakdown"
   },
   "reconciliation": {
     "title": "Reconciliation",

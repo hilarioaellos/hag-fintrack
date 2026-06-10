@@ -337,7 +337,13 @@
     "granWeekly": "Semanal",
     "granMonthly": "Mensual",
     "week": "Sem {n}",
-    "uncategorized": "Sin categoría"
+    "uncategorized": "Sin categoría",
+    "period1m": "1M",
+    "kpiIncome": "Ingresos totales",
+    "kpiExpenses": "Gastos totales",
+    "kpiNetSavings": "Ahorro neto",
+    "kpiSavingsRate": "Tasa de ahorro",
+    "categoryBreakdown": "Desglose por categoría"
   },
   "reconciliation": {
     "title": "Conciliación",
