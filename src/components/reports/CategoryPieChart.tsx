@@ -1,15 +1,14 @@
 "use client";
 import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { formatMoney } from "@/lib/money";
-import { X } from "lucide-react";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { MonthNav } from "@/components/budget/MonthNav";
-import type { Doc } from "@convex-api/dataModel";
+import { CategoryDrillDown } from "./CategoryDrillDown";
 
 function currentYearMonth() {
   const now = new Date();
@@ -20,7 +19,6 @@ type CatRow = { categoryId: string; name: string; icon: string; color: string; t
 
 export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
-  const locale = useLocale();
   const [{ year, month }, setPeriod] = useState(currentYearMonth);
   const [selectedCat, setSelectedCat] = useState<CatRow | null>(null);
   const [txType, setTxType] = useState<"expense" | "income">("expense");
@@ -29,24 +27,6 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
 
   useEffect(() => { setSelectedCat(null); }, [currencyCode]);
 
-  const startMs = new Date(year, month - 1, 1).getTime();
-  const endMs = new Date(year, month, 1).getTime() - 1;
-
-  const monthTxs = useQuery(
-    selectedCat ? api.fintrack.transactions.list : "skip",
-    selectedCat ? { startDate: startMs, endDate: endMs } : "skip"
-  );
-  const accounts = useQuery(selectedCat ? api.fintrack.accounts.list : "skip");
-
-  const drillTxs = (monthTxs ?? []).filter(
-    (tx: Doc<"fintrack_transactions">) => {
-      if (selectedCat?.categoryId === "__none__") {
-        return !tx.categoryId && tx.type === "expense" && tx.currencyCode === currencyCode;
-      }
-      return tx.categoryId === selectedCat?.categoryId && tx.currencyCode === currencyCode;
-    }
-  );
-
   const total = (data ?? []).reduce((s: number, d: CatRow) => s + d.totalCents, 0);
 
   const handlePeriodChange = (y: number, m: number) => {
@@ -54,8 +34,8 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
     setSelectedCat(null);
   };
 
-  const handleTypeChange = (t: "expense" | "income") => {
-    setTxType(t);
+  const handleTypeChange = (type: "expense" | "income") => {
+    setTxType(type);
     setSelectedCat(null);
   };
 
@@ -175,69 +155,19 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
             </div>
           </div>
 
-          {/* Drill-down panel */}
+          {/* Drill-down — separate component avoids conditional useQuery ("skip" bug) */}
           {selectedCat && (
-            <div
-              className="rounded-xl border mt-2"
-              style={{ borderColor: "var(--color-ft-border)", backgroundColor: "var(--color-ft-surface-2)" }}
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: "var(--color-ft-border)" }}>
-                <div className="flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: selectedCat.color ?? "#94a3b8" }}
-                  />
-                  <span className="text-sm font-semibold" style={{ color: "var(--color-ft-text)" }}>
-                    {catLabel(selectedCat)}
-                  </span>
-                  <span className="text-sm font-mono" style={{ color: "var(--color-ft-bad)" }}>
-                    {formatMoney(selectedCat.totalCents, currencyCode)}
-                  </span>
-                </div>
-                <button
-                  onClick={() => setSelectedCat(null)}
-                  className="p-1 rounded-lg"
-                  style={{ color: "var(--color-ft-text-3)" }}
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {monthTxs === undefined ? (
-                <div className="p-4 animate-pulse h-16 rounded-b-xl" style={{ backgroundColor: "var(--color-ft-surface-2)" }} />
-              ) : drillTxs.length === 0 ? (
-                <p className="text-xs text-center py-4" style={{ color: "var(--color-ft-text-3)" }}>
-                  {t("noData")}
-                </p>
-              ) : (
-                <div className="max-h-52 overflow-y-auto">
-                  {drillTxs.map((tx: Doc<"fintrack_transactions">) => {
-                    const account = accounts?.find((a: Doc<"fintrack_accounts">) => a._id === tx.accountId);
-                    const dateStr = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" })
-                      .format(new Date(tx.date));
-                    return (
-                      <div
-                        key={tx._id}
-                        className="flex items-center justify-between px-4 py-2.5 border-b last:border-0"
-                        style={{ borderColor: "var(--color-ft-border)" }}
-                      >
-                        <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-medium truncate" style={{ color: "var(--color-ft-text)" }}>
-                            {tx.notes || account?.name || "—"}
-                          </span>
-                          <span className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-                            {dateStr} · {account?.name ?? ""}
-                          </span>
-                        </div>
-                        <span className="text-xs font-mono ml-4 shrink-0" style={{ color: "var(--color-ft-bad)" }}>
-                          {formatMoney(Math.abs(tx.amountCents), currencyCode)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+            <CategoryDrillDown
+              categoryId={selectedCat.categoryId}
+              label={catLabel(selectedCat)}
+              color={selectedCat.color ?? "#94a3b8"}
+              totalCents={selectedCat.totalCents}
+              year={year}
+              month={month}
+              currencyCode={currencyCode}
+              txType={txType}
+              onClose={() => setSelectedCat(null)}
+            />
           )}
         </>
       )}
