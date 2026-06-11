@@ -1,14 +1,11 @@
 "use client";
-import { useQuery } from "convex/react";
-import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { formatMoney } from "@/lib/money";
 import { localMonthRange } from "@/lib/dates";
 import { MonthNav } from "@/components/budget/MonthNav";
 import { CategoryDrillDown } from "./CategoryDrillDown";
-
-type CatRow = { categoryId: string; name: string; icon: string; color: string; totalCents: number };
+import { useCategoryBreakdown, type CatRow } from "./useCategoryBreakdown";
 
 function currentYearMonth() {
   const now = new Date();
@@ -26,11 +23,9 @@ export function CategoryBarChart({ currencyCode }: { currencyCode: string }) {
   const [selectedCat, setSelectedCat] = useState<CatRow | null>(null);
 
   const { startMs, endMs } = localMonthRange(year, month);
-  const raw = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType, startMs, endMs });
+  const raw = useCategoryBreakdown(year, month, currencyCode, txType);
 
-  const data: CatRow[] = raw
-    ? [...(raw as CatRow[])].sort((a, b) => b.totalCents - a.totalCents)
-    : [];
+  const data: CatRow[] = raw ?? [];
 
   const maxCents = data[0]?.totalCents ?? 1;
   const total = data.reduce((s, d) => s + d.totalCents, 0);

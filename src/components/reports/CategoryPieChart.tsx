@@ -1,6 +1,4 @@
 "use client";
-import { useQuery } from "convex/react";
-import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { formatMoney } from "@/lib/money";
@@ -10,13 +8,12 @@ import {
 } from "recharts";
 import { MonthNav } from "@/components/budget/MonthNav";
 import { CategoryDrillDown } from "./CategoryDrillDown";
+import { useCategoryBreakdown, type CatRow } from "./useCategoryBreakdown";
 
 function currentYearMonth() {
   const now = new Date();
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
 }
-
-type CatRow = { categoryId: string; name: string; icon: string; color: string; totalCents: number };
 
 export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const t = useTranslations("reports");
@@ -25,7 +22,7 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const [txType, setTxType] = useState<"expense" | "income">("expense");
 
   const { startMs, endMs } = localMonthRange(year, month);
-  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType, startMs, endMs });
+  const data = useCategoryBreakdown(year, month, currencyCode, txType);
 
   useEffect(() => { setSelectedCat(null); }, [currencyCode]);
 
