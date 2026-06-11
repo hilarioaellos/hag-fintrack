@@ -25,3 +25,16 @@ export function toLocalDateInputOpt(ts?: number): string {
   if (!ts) return "";
   return toLocalDateInput(ts);
 }
+
+/**
+ * Returns { startMs, endMs } for a given year/month in the user's LOCAL timezone.
+ * startMs = local midnight on the 1st; endMs = local midnight on the 1st of the next month (exclusive).
+ * Pass these to backend queries so that transactions are bucketed by the date the user sees,
+ * not by the Convex server's UTC clock.
+ */
+export function localMonthRange(year: number, month: number): { startMs: number; endMs: number } {
+  return {
+    startMs: new Date(year, month - 1, 1).getTime(),
+    endMs:   new Date(year, month, 1).getTime(),
+  };
+}

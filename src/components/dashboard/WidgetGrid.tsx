@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { localMonthRange } from "@/lib/dates";
 import { useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import {
@@ -48,10 +49,16 @@ export function WidgetGrid() {
   const [period, setPeriod] = useState({ year: now.getFullYear(), month: now.getMonth() + 1 });
 
   const netWorthCents = useQuery(api.fintrack.accounts.netWorthCents, { currencyCode: effectiveCurrency }) ?? 0;
+  const { startMs: statsStart, endMs: statsEnd } = useMemo(
+    () => localMonthRange(period.year, period.month),
+    [period.year, period.month]
+  );
   const stats = useQuery(api.fintrack.transactions.monthlyStats, {
     year: period.year,
     month: period.month,
     currencyCode: effectiveCurrency,
+    startMs: statsStart,
+    endMs: statsEnd,
   }) ?? { incomeCents: 0, expensesCents: 0, cashflowCents: 0 };
 
   useEffect(() => {

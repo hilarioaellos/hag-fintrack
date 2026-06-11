@@ -11,8 +11,8 @@ interface CategoryDrillDownProps {
   label: string;
   color: string;
   totalCents: number;
-  year: number;
-  month: number;
+  startMs: number;
+  endMs: number;
   currencyCode: string;
   txType: "expense" | "income";
   onClose: () => void;
@@ -20,16 +20,14 @@ interface CategoryDrillDownProps {
 
 // Rendered only when a category is selected — all useQuery calls are unconditional here
 export function CategoryDrillDown({
-  categoryId, label, color, totalCents, year, month, currencyCode, txType, onClose,
+  categoryId, label, color, totalCents, startMs, endMs, currencyCode, txType, onClose,
 }: CategoryDrillDownProps) {
   const t = useTranslations("reports");
   const locale = useLocale();
 
-  // Use UTC boundaries to match the server-side expensesByCategory query (Convex runs in UTC)
-  const startMs = Date.UTC(year, month - 1, 1);
-  const endMs = Date.UTC(year, month, 1) - 1;
-
-  const monthTxs = useQuery(api.fintrack.transactions.list, { startDate: startMs, endDate: endMs });
+  // endMs from parent is the exclusive upper bound (first ms of next month local).
+  // transactions.list uses lte, so subtract 1ms to stay within the month.
+  const monthTxs = useQuery(api.fintrack.transactions.list, { startDate: startMs, endDate: endMs - 1 });
   const accounts = useQuery(api.fintrack.accounts.list);
 
   const drillTxs = (monthTxs ?? []).filter((tx: Doc<"fintrack_transactions">) => {

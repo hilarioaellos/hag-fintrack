@@ -4,6 +4,7 @@ import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { formatMoney } from "@/lib/money";
+import { localMonthRange } from "@/lib/dates";
 import { MonthNav } from "@/components/budget/MonthNav";
 import { CategoryDrillDown } from "./CategoryDrillDown";
 
@@ -24,7 +25,8 @@ export function CategoryBarChart({ currencyCode }: { currencyCode: string }) {
   const [txType, setTxType] = useState<"expense" | "income">("expense");
   const [selectedCat, setSelectedCat] = useState<CatRow | null>(null);
 
-  const raw = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType });
+  const { startMs, endMs } = localMonthRange(year, month);
+  const raw = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType, startMs, endMs });
 
   const data: CatRow[] = raw
     ? [...(raw as CatRow[])].sort((a, b) => b.totalCents - a.totalCents)
@@ -124,8 +126,8 @@ export function CategoryBarChart({ currencyCode }: { currencyCode: string }) {
               label={catLabel(selectedCat, t("uncategorized"))}
               color={selectedCat.color ?? "#94a3b8"}
               totalCents={selectedCat.totalCents}
-              year={year}
-              month={month}
+              startMs={startMs}
+              endMs={endMs}
               currencyCode={currencyCode}
               txType={txType}
               onClose={() => setSelectedCat(null)}

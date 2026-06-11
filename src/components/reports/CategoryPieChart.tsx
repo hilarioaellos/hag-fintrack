@@ -4,6 +4,7 @@ import { api } from "@/lib/convex";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { formatMoney } from "@/lib/money";
+import { localMonthRange } from "@/lib/dates";
 import {
   PieChart, Pie, Cell, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -23,7 +24,8 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
   const [selectedCat, setSelectedCat] = useState<CatRow | null>(null);
   const [txType, setTxType] = useState<"expense" | "income">("expense");
 
-  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType });
+  const { startMs, endMs } = localMonthRange(year, month);
+  const data = useQuery(api.fintrack.reports.expensesByCategory, { year, month, currencyCode, txType, startMs, endMs });
 
   useEffect(() => { setSelectedCat(null); }, [currencyCode]);
 
@@ -162,8 +164,8 @@ export function CategoryPieChart({ currencyCode }: { currencyCode: string }) {
               label={catLabel(selectedCat)}
               color={selectedCat.color ?? "#94a3b8"}
               totalCents={selectedCat.totalCents}
-              year={year}
-              month={month}
+              startMs={startMs}
+              endMs={endMs}
               currencyCode={currencyCode}
               txType={txType}
               onClose={() => setSelectedCat(null)}
