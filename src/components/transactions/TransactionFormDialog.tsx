@@ -57,7 +57,10 @@ export function TransactionFormDialog({
 
   const isEdit = !!transaction;
 
-  const todayISO = new Date().toISOString().slice(0, 10);
+  // Use local date (not UTC) so dates near midnight don't shift by one day for US timezones
+  const toLocalISO = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const todayISO = toLocalISO(new Date());
 
   const [type, setType] = useState<TxType>(
     (transaction?.type as TxType) ?? "expense"
@@ -71,7 +74,7 @@ export function TransactionFormDialog({
   );
   const [categoryId, setCategoryId] = useState(transaction?.categoryId ?? "");
   const [date, setDate] = useState(
-    transaction ? new Date(transaction.date).toISOString().slice(0, 10) : todayISO
+    transaction ? toLocalISO(new Date(transaction.date)) : todayISO
   );
   const [notes, setNotes] = useState(transaction?.notes ?? "");
   const [isShared, setIsShared] = useState(false);
@@ -93,7 +96,7 @@ export function TransactionFormDialog({
     setAmount(transaction ? String(Math.abs(transaction.amountCents) / 100) : "");
     setAccountId(transaction?.accountId ?? defaultAccountId ?? "");
     setCategoryId(transaction?.categoryId ?? "");
-    setDate(transaction ? new Date(transaction.date).toISOString().slice(0, 10) : todayISO);
+    setDate(transaction ? toLocalISO(new Date(transaction.date)) : todayISO);
     setNotes(transaction?.notes ?? "");
     setIsShared(false);
     setSharedAmount("");

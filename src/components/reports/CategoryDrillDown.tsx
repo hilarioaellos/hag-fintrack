@@ -25,8 +25,9 @@ export function CategoryDrillDown({
   const t = useTranslations("reports");
   const locale = useLocale();
 
-  const startMs = new Date(year, month - 1, 1).getTime();
-  const endMs = new Date(year, month, 1).getTime() - 1;
+  // Use UTC boundaries to match the server-side expensesByCategory query (Convex runs in UTC)
+  const startMs = Date.UTC(year, month - 1, 1);
+  const endMs = Date.UTC(year, month, 1) - 1;
 
   const monthTxs = useQuery(api.fintrack.transactions.list, { startDate: startMs, endDate: endMs });
   const accounts = useQuery(api.fintrack.accounts.list);
@@ -35,7 +36,7 @@ export function CategoryDrillDown({
     if (categoryId === "__none__") {
       return !tx.categoryId && tx.type === txType && tx.currencyCode === currencyCode;
     }
-    return tx.categoryId === categoryId && tx.currencyCode === currencyCode;
+    return tx.categoryId === categoryId && tx.type === txType && tx.currencyCode === currencyCode;
   });
 
   const amountColor = txType === "expense" ? "var(--color-ft-bad)" : "var(--color-ft-good)";

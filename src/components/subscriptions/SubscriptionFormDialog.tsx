@@ -31,7 +31,8 @@ const inputStyle = {
 };
 
 function tsToDateInput(ts: number): string {
-  return new Date(ts).toISOString().slice(0, 10);
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Props) {
