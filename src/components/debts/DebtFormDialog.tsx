@@ -2,6 +2,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
+import { toLocalDateInputOpt, dateInputToTimestamp } from "@/lib/dates";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -31,11 +32,7 @@ const inputStyle = {
   color: "var(--color-ft-text)",
 };
 
-function tsToDateInput(ts?: number): string {
-  if (!ts) return "";
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+const tsToDateInput = toLocalDateInputOpt;
 
 export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
   const t = useTranslations("debts");
@@ -133,7 +130,7 @@ export function DebtFormDialog({ open, onOpenChange, debt }: Props) {
     // Para deudas revolving, no enviar campos exclusivos de installment
     const isInstallment = currentType === "installment";
     const a7 = {
-      originDate: originDate ? new Date(originDate).getTime() : undefined,
+      originDate: originDate ? dateInputToTimestamp(originDate) : undefined,
       paymentDueDate: paymentDueDateNum,
       paymentPeriodicity: periodicity !== "none" ? (periodicity as Periodicity) : undefined,
       totalTermMonths: isInstallment ? totalTermNum : undefined,

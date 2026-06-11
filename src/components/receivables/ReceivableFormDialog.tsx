@@ -2,6 +2,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
+import { toLocalDateInputOpt, dateInputToTimestamp } from "@/lib/dates";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,7 @@ const inputStyle = {
   color: "var(--color-ft-text)",
 };
 
-function tsToDateInput(ts?: number): string {
-  if (!ts) return "";
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+const tsToDateInput = toLocalDateInputOpt;
 
 export function ReceivableFormDialog({ open, onOpenChange, receivable }: Props) {
   const t = useTranslations("receivables");
@@ -113,7 +110,7 @@ export function ReceivableFormDialog({ open, onOpenChange, receivable }: Props) 
           debtorName: debtorName.trim(),
           description: description.trim(),
           // null → backend elimina el campo; undefined no se enviará nunca aquí
-          dueDate: dueDate ? new Date(dueDate).getTime() : null,
+          dueDate: dueDate ? dateInputToTimestamp(dueDate) : null,
           interestRate: interestRateBps !== undefined ? interestRateBps : null,
           paymentPeriodicity: periodicity !== "none" ? periodicity : null,
           notes: notes.trim() || null,
@@ -124,9 +121,9 @@ export function ReceivableFormDialog({ open, onOpenChange, receivable }: Props) 
           description: description.trim(),
           originalAmount: amountCents,
           currencyCode: currency.toUpperCase().trim(),
-          originDate: new Date(originDate).getTime(),
+          originDate: dateInputToTimestamp(originDate),
           // create acepta v.optional(v.number()), no null
-          dueDate: dueDate ? new Date(dueDate).getTime() : undefined,
+          dueDate: dueDate ? dateInputToTimestamp(dueDate) : undefined,
           interestRate: interestRateBps,
           paymentPeriodicity: periodicity !== "none" ? periodicity : undefined,
           notes: notes.trim() || undefined,

@@ -2,6 +2,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
+import { toLocalDateInputOpt, dateInputToTimestamp } from "@/lib/dates";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -30,10 +31,7 @@ const inputStyle = {
   color: "var(--color-ft-text)",
 };
 
-function tsToDateInput(ts: number): string {
-  const d = new Date(ts);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
+const tsToDateInput = toLocalDateInputOpt;
 
 export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Props) {
   const t = useTranslations("subscriptions");
@@ -101,7 +99,7 @@ export function SubscriptionFormDialog({ open, onOpenChange, subscription }: Pro
     const amountCents = Number.isFinite(amountFloat) ? dollarsToCents(amountFloat) : 0;
     if (amountCents <= 0) { setError("Amount must be greater than 0"); return; }
 
-    const nextRenewalTs = new Date(nextRenewal).getTime();
+    const nextRenewalTs = dateInputToTimestamp(nextRenewal);
     const resolvedCategoryId = categoryId !== "none" ? (categoryId as Id<"fintrack_categories">) : undefined;
 
     setLoading(true);

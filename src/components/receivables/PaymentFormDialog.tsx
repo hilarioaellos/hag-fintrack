@@ -2,6 +2,7 @@
 import { useMutation } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents, formatMoney } from "@/lib/money";
+import { toLocalDateInput, dateInputToTimestamp } from "@/lib/dates";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +32,7 @@ export function PaymentFormDialog({ open, onOpenChange, receivable }: Props) {
   const tc = useTranslations("common");
   const recordMutation = useMutation(api.fintrack.receivables.recordPayment);
 
-  const today = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
+  const today = toLocalDateInput(new Date().getTime());
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(today);
   const [method, setMethod] = useState("");
@@ -71,7 +72,7 @@ export function PaymentFormDialog({ open, onOpenChange, receivable }: Props) {
       await recordMutation({
         receivableId: receivable._id,
         amount: amountCents,
-        paymentDate: new Date(paymentDate).getTime(),
+        paymentDate: dateInputToTimestamp(paymentDate),
         method: method.trim(),
         note: note.trim() || undefined,
       });

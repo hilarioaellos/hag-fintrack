@@ -2,6 +2,7 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents } from "@/lib/money";
+import { toLocalDateInput, dateInputToTimestamp } from "@/lib/dates";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -57,10 +58,7 @@ export function TransactionFormDialog({
 
   const isEdit = !!transaction;
 
-  // Use local date (not UTC) so dates near midnight don't shift by one day for US timezones
-  const toLocalISO = (d: Date) =>
-    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  const todayISO = toLocalISO(new Date());
+  const todayISO = toLocalDateInput(Date.now());
 
   const [type, setType] = useState<TxType>(
     (transaction?.type as TxType) ?? "expense"
@@ -74,7 +72,7 @@ export function TransactionFormDialog({
   );
   const [categoryId, setCategoryId] = useState(transaction?.categoryId ?? "");
   const [date, setDate] = useState(
-    transaction ? toLocalISO(new Date(transaction.date)) : todayISO
+    transaction ? toLocalDateInput(transaction.date) : todayISO
   );
   const [notes, setNotes] = useState(transaction?.notes ?? "");
   const [isShared, setIsShared] = useState(false);
@@ -96,7 +94,7 @@ export function TransactionFormDialog({
     setAmount(transaction ? String(Math.abs(transaction.amountCents) / 100) : "");
     setAccountId(transaction?.accountId ?? defaultAccountId ?? "");
     setCategoryId(transaction?.categoryId ?? "");
-    setDate(transaction ? toLocalISO(new Date(transaction.date)) : todayISO);
+    setDate(transaction ? toLocalDateInput(transaction.date) : todayISO);
     setNotes(transaction?.notes ?? "");
     setIsShared(false);
     setSharedAmount("");
@@ -128,7 +126,7 @@ export function TransactionFormDialog({
     }
 
     const amountCents = dollarsToCents(amountNum);
-    const dateTs = new Date(date + "T12:00:00").getTime();
+    const dateTs = dateInputToTimestamp(date);
 
     setLoading(true);
     try {

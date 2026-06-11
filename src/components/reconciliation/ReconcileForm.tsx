@@ -2,6 +2,7 @@
 import { useMutation } from "convex/react";
 import { api } from "@/lib/convex";
 import { dollarsToCents, formatMoney } from "@/lib/money";
+import { toLocalDateInput, dateInputToTimestamp } from "@/lib/dates";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
@@ -28,7 +29,7 @@ export function ReconcileForm({ account, onCreated }: Props) {
   const createMutation = useMutation(api.fintrack.reconciliations.create);
 
   const [bankBalance, setBankBalance] = useState("");
-  const [date, setDate] = useState(() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; });
+  const [date, setDate] = useState(() => toLocalDateInput(Date.now()));
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -49,7 +50,7 @@ export function ReconcileForm({ account, onCreated }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!bankBalance) { setError(t("errorBankBalanceRequired")); return; }
-    const dateTs = new Date(date + "T12:00:00").getTime();
+    const dateTs = dateInputToTimestamp(date);
     if (isNaN(dateTs)) { setError(t("errorInvalidDate")); return; }
     setLoading(true);
     setError("");

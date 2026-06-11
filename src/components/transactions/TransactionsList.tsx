@@ -80,7 +80,7 @@ export function TransactionsList() {
       if (max !== null && abs > max) return false;
       return true;
     });
-  }, [transactions, search, amountMin, amountMax]);
+  }, [transactions, search, amountMin, amountMax, filterCategoryId]);
 
   const hasActiveFilters = !!(dateFrom || dateTo || search || amountMin || amountMax || filterCategoryId !== "all");
 
