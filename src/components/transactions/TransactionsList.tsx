@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { TransactionFormDialog } from "./TransactionFormDialog";
 import { CSVImportDialog } from "./CSVImportDialog";
+import { ExportMenu } from "./ExportMenu";
 import type { Doc } from "@convex-api/dataModel";
 
 type Transaction = Doc<"fintrack_transactions">;
@@ -182,6 +183,14 @@ export function TransactionsList() {
             style={{ borderColor: "var(--color-ft-border)", color: "var(--color-ft-text-2)" }}>
             <Upload className="h-3.5 w-3.5" /> CSV
           </Button>
+          <ExportMenu
+            transactions={filtered ?? []}
+            accountMap={accountMap}
+            categoryMap={categoryMap}
+            dateFrom={dateFrom}
+            dateTo={dateTo}
+            disabled={filtered === undefined || accounts === undefined || categories === undefined}
+          />
           <Button size="sm" onClick={() => setAddOpen(true)}
             style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18" }}>
             <Plus className="h-3.5 w-3.5" /> {t("addTransaction")}
