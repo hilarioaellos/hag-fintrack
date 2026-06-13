@@ -1,20 +1,25 @@
 "use client";
-import { useEffect } from "react";
-import { useMutation } from "convex/react";
+import { useEffect, useRef } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 
-// Runs once when the dashboard shell mounts. Ensures every user has:
-// 1. System categories seeded (idempotent by name)
-// 2. fintrack_category_settings records for all their categories
-// Both mutations are idempotent — safe to call on every session start.
 export function CategorySettingsInit() {
+  const settings = useQuery(api.fintrack.user_settings.get);
+  const cleanLegacy = useMutation(api.fintrack.categories.cleanLegacySystemCategories);
   const seed = useMutation(api.fintrack.categories.seed);
   const initSettings = useMutation(api.fintrack.categories.initializeSettings);
+  const ran = useRef(false);
 
   useEffect(() => {
-    seed().then(() => initSettings());
+    if (settings === undefined || ran.current) return;
+    ran.current = true;
+
+    const alreadyReviewed = settings?.categoriesReviewed === true;
+    cleanLegacy()
+      .then(() => (alreadyReviewed ? Promise.resolve() : seed()))
+      .then(() => initSettings());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [settings]);
 
   return null;
 }

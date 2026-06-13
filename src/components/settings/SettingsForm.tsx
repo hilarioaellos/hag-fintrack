@@ -12,6 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import type { Doc } from "@convex-api/dataModel";
+import { useCategoryOnboarding } from "@/components/providers/CategoryOnboardingProvider";
 
 const inputStyle = {
   backgroundColor: "var(--color-ft-surface-2)",
@@ -119,7 +120,7 @@ function CatRow({ cat, pending, editState, setEditState, deleteId, setDeleteId, 
 
   return (
     <div className="grid gap-2 items-center px-2 py-1 rounded-lg"
-      style={{ backgroundColor: "var(--color-ft-surface-2)", gridTemplateColumns: cat.isSystem ? "1fr 80px 80px" : "1fr 80px 80px 56px" }}>
+      style={{ backgroundColor: "var(--color-ft-surface-2)", gridTemplateColumns: "1fr 80px 80px 56px" }}>
       <span className="text-sm flex items-center gap-1.5" style={{ color: "var(--color-ft-text)" }}>
         {cat.color && <span className="w-2 h-2 rounded-full shrink-0 inline-block" style={{ backgroundColor: cat.color }} />}
         {cat.icon && <span>{cat.icon}</span>}
@@ -132,23 +133,24 @@ function CatRow({ cat, pending, editState, setEditState, deleteId, setDeleteId, 
       <div className="flex justify-center">
         <Toggle on={!excl} disabled={locked} onChange={() => onToggle(cat, "excludeFromReports", excl)} />
       </div>
-      {!cat.isSystem && (
-        <div className="flex justify-center gap-1">
+      <div className="flex justify-center gap-1">
+        {!cat.isSystem && (
           <button type="button" onClick={() => setEditState({ id: cat._id, name: cat.name, icon: cat.icon ?? "", color: cat.color ?? "#94a3b8" })}
             className="p-1 rounded hover:bg-[var(--color-ft-surface)]" style={{ color: "var(--color-ft-text-3)" }}>
             <Pencil className="h-3.5 w-3.5" />
           </button>
-          <button type="button" onClick={() => setDeleteId(cat._id)}
-            className="p-1 rounded hover:bg-[var(--color-ft-surface)]" style={{ color: "var(--color-ft-text-3)" }}>
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      )}
+        )}
+        <button type="button" onClick={() => setDeleteId(cat._id)}
+          className="p-1 rounded hover:bg-[var(--color-ft-surface)]" style={{ color: "var(--color-ft-text-3)" }}>
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
 
 function CategoryPreferences() {
+  const { open: openWizard } = useCategoryOnboarding();
   const categories = useQuery(api.fintrack.categories.listWithSettings);
   const initSettings = useMutation(api.fintrack.categories.initializeSettings);
   const updateSetting = useMutation(api.fintrack.categories.updateSetting);
@@ -217,9 +219,19 @@ function CategoryPreferences() {
 
   return (
     <div className="space-y-3">
-      <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-        Manage categories. 🔒 = required by system.
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+          Manage categories. 🔒 = required by system.
+        </p>
+        <button
+          type="button"
+          onClick={openWizard}
+          className="text-xs underline"
+          style={{ color: "var(--color-ft-primary)" }}
+        >
+          Re-run setup
+        </button>
+      </div>
 
       <div className="space-y-1 max-h-72 overflow-y-auto pr-1">
         {/* Header */}
