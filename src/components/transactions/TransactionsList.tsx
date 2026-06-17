@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback, memo } from "react";
 import { Plus, Upload, Trash2, Pencil, Receipt, SlidersHorizontal, X, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ import { ExportMenu } from "./ExportMenu";
 import type { Doc } from "@convex-api/dataModel";
 
 type Transaction = Doc<"fintrack_transactions">;
+type Category = Doc<"fintrack_categories">;
+type Account = Doc<"fintrack_accounts">;
 
 const inputStyle = {
   backgroundColor: "var(--color-ft-surface-2)",
@@ -29,6 +31,102 @@ const inputStyle = {
   height: "2rem",
   fontSize: "0.75rem",
 };
+
+// ── Memoized row — only re-renders when its own props change ──────────────────
+interface RowProps {
+  tx: Transaction;
+  i: number;
+  cat: Category | undefined;
+  acc: Account | undefined;
+  searchQuery: string;
+  isSelected: boolean;
+  hasAnySelected: boolean;
+  onSelect: (id: string) => void;
+  onEdit: (tx: Transaction) => void;
+  onDelete: (id: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+const TransactionRow = memo(function TransactionRow({
+  tx, i, cat, acc, searchQuery, isSelected, hasAnySelected, onSelect, onEdit, onDelete, t,
+}: RowProps) {
+  const isExpense = tx.type === "expense";
+  const amountColor = isExpense
+    ? "var(--color-ft-bad)"
+    : tx.type === "transfer"
+    ? "var(--color-ft-primary)"
+    : "var(--color-ft-good)";
+  const displayAmount = isExpense ? -Math.abs(tx.amountCents) : Math.abs(tx.amountCents);
+  const notes = tx.notes ?? (isExpense ? t("expense") : t("income"));
+  const matchIdx = searchQuery ? notes.toLowerCase().indexOf(searchQuery) : -1;
+
+  return (
+    <div
+      className="flex items-center gap-3 px-4 py-3 group"
+      style={{
+        borderTop: i > 0 ? "1px solid var(--color-ft-border)" : undefined,
+        backgroundColor: isSelected
+          ? "color-mix(in srgb, var(--color-ft-primary) 6%, transparent)"
+          : undefined,
+      }}
+    >
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={() => onSelect(tx._id)}
+        className="w-3.5 h-3.5 shrink-0 accent-[var(--color-ft-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
+        style={{ opacity: isSelected || hasAnySelected ? 1 : undefined }}
+      />
+      <div
+        className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0"
+        style={{ backgroundColor: "var(--color-ft-surface-2)" }}
+      >
+        {tx.type === "transfer" ? "↔️" : (cat?.icon ?? "📦")}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate" style={{ color: "var(--color-ft-text)" }}>
+          {matchIdx >= 0 ? (
+            <>
+              {notes.slice(0, matchIdx)}
+              <mark style={{ backgroundColor: "color-mix(in srgb, var(--color-ft-primary) 30%, transparent)", color: "var(--color-ft-text)", borderRadius: "2px", padding: "0 1px" }}>
+                {notes.slice(matchIdx, matchIdx + searchQuery.length)}
+              </mark>
+              {notes.slice(matchIdx + searchQuery.length)}
+            </>
+          ) : notes}
+        </p>
+        <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
+          {tx.type === "transfer"
+            ? `Transfer · ${acc?.name ?? ""}`
+            : `${cat?.name ?? t("uncategorized")} · ${acc?.name ?? ""}`}
+          {" · "}{format(new Date(tx.date), "MMM d, yyyy")}
+          {tx.source === "csv" && <span className="ml-1 opacity-50">[csv]</span>}
+        </p>
+      </div>
+
+      <p className="ft-num text-sm font-bold shrink-0" style={{ color: amountColor }}>
+        {tx.type === "transfer" ? "" : isExpense ? "-" : "+"}
+        {formatMoney(Math.abs(displayAmount), acc?.currencyCode ?? "USD")}
+      </p>
+
+      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        <button onClick={() => onEdit(tx)} className="p-1 rounded" style={{ color: "var(--color-ft-text-3)" }}>
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={() => onDelete(tx._id)}
+          className="p-1 rounded"
+          style={{ color: "var(--color-ft-bad)" }}
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 export function TransactionsList() {
   const t = useTranslations("transactions");
@@ -42,6 +140,13 @@ export function TransactionsList() {
   const [amountMax, setAmountMax] = useState("");
   const [filterCategoryId, setFilterCategoryId] = useState("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  // Debounced search — filter only fires 200 ms after the user stops typing
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const id = setTimeout(() => setDebouncedSearch(search.trim().toLowerCase()), 200);
+    return () => clearTimeout(id);
+  }, [search]);
 
   // ── Dialogs ───────────────────────────────────────────────────────────────
   const [addOpen, setAddOpen] = useState(false);
@@ -70,17 +175,23 @@ export function TransactionsList() {
   const removeMutation = useMutation(api.fintrack.transactions.remove);
   const bulkUpdateCategoryMutation = useMutation(api.fintrack.transactions.bulkUpdateCategory);
 
-  const categoryMap = Object.fromEntries((categories ?? []).map((c: Doc<"fintrack_categories">) => [c._id, c]));
-  const accountMap  = Object.fromEntries((accounts  ?? []).map((a: Doc<"fintrack_accounts">)   => [a._id, a]));
+  // Memoized lookup maps — only rebuild when source data changes
+  const categoryMap = useMemo(
+    () => Object.fromEntries((categories ?? []).map((c: Category) => [c._id, c])),
+    [categories]
+  );
+  const accountMap = useMemo(
+    () => Object.fromEntries((accounts ?? []).map((a: Account) => [a._id, a])),
+    [accounts]
+  );
 
-  // ── Client-side filtering (notes search + amount range) ───────────────────
+  // ── Client-side filtering ─────────────────────────────────────────────────
   const filtered = useMemo(() => {
     if (!transactions) return undefined;
-    const q = search.trim().toLowerCase();
     const min = amountMin ? parseFloat(amountMin) * 100 : null;
     const max = amountMax ? parseFloat(amountMax) * 100 : null;
     return transactions.filter((tx: Transaction) => {
-      if (q && !(tx.notes ?? "").toLowerCase().includes(q)) return false;
+      if (debouncedSearch && !(tx.notes ?? "").toLowerCase().includes(debouncedSearch)) return false;
       if (filterCategoryId === "__none__" && tx.categoryId) return false;
       if (filterCategoryId !== "all" && filterCategoryId !== "__none__" && tx.categoryId !== filterCategoryId) return false;
       const abs = Math.abs(tx.amountCents);
@@ -88,22 +199,58 @@ export function TransactionsList() {
       if (max !== null && abs > max) return false;
       return true;
     });
-  }, [transactions, search, amountMin, amountMax, filterCategoryId]);
+  }, [transactions, debouncedSearch, amountMin, amountMax, filterCategoryId]);
+
+  // Memoized totals
+  const totals = useMemo(
+    () => (filtered ?? []).reduce(
+      (acc: { income: number; expenses: number }, tx: Transaction) => {
+        if (tx.type === "income") acc.income += tx.amountCents;
+        else if (tx.type === "expense") acc.expenses += Math.abs(tx.amountCents);
+        return acc;
+      },
+      { income: 0, expenses: 0 }
+    ),
+    [filtered]
+  );
 
   const hasActiveFilters = !!(dateFrom || dateTo || search || amountMin || amountMax || filterCategoryId !== "all");
 
-  // Clear selection when filters or data change
-  useEffect(() => { setSelectedIds(new Set()); }, [filterAccountId, dateFrom, dateTo, search, amountMin, amountMax, filterCategoryId]);
+  // Clear selection when filters change
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [filterAccountId, dateFrom, dateTo, debouncedSearch, amountMin, amountMax, filterCategoryId]);
 
-  const filteredIds = useMemo(() => (filtered ?? []).map((tx: Transaction) => tx._id as string), [filtered]);
-  const allSelected = filteredIds.length > 0 && filteredIds.every((id: string) => selectedIds.has(id));
-  const someSelected = !allSelected && filteredIds.some((id: string) => selectedIds.has(id));
+  const filteredIds = useMemo(
+    () => (filtered ?? []).map((tx: Transaction) => tx._id as string),
+    [filtered]
+  );
 
-  const toggleSelect = (id: string) =>
-    setSelectedIds((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  // Memoized select-all state — avoids .every()/.some() on every render
+  const { allSelected, someSelected } = useMemo(() => {
+    if (filteredIds.length === 0) return { allSelected: false, someSelected: false };
+    let selectedCount = 0;
+    for (const id of filteredIds) { if (selectedIds.has(id)) selectedCount++; }
+    return {
+      allSelected: selectedCount === filteredIds.length,
+      someSelected: selectedCount > 0 && selectedCount < filteredIds.length,
+    };
+  }, [filteredIds, selectedIds]);
 
-  const toggleSelectAll = () =>
-    setSelectedIds(allSelected ? new Set() : new Set(filteredIds));
+  // Stable callbacks — row memo won't break on each render
+  const toggleSelect = useCallback((id: string) =>
+    setSelectedIds((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; }),
+  []);
+
+  const toggleSelectAll = useCallback(() =>
+    setSelectedIds(allSelected ? new Set() : new Set(filteredIds)),
+  [allSelected, filteredIds]);
+
+  const handleEdit = useCallback((tx: Transaction) => setEditTx(tx), []);
+
+  const handleDelete = useCallback(async (id: string) => {
+    if (confirm(t("confirmDelete"))) await removeMutation({ id: id as Doc<"fintrack_transactions">["_id"] });
+  }, [removeMutation, t]);
 
   const handleBulkAssign = async () => {
     if (!bulkCategoryId || selectedIds.size === 0) return;
@@ -126,19 +273,12 @@ export function TransactionsList() {
     setFilterCategoryId("all");
   };
 
-  const totals = (filtered ?? []).reduce(
-    (acc: { income: number; expenses: number }, tx: Transaction) => {
-      if (tx.type === "income") acc.income += tx.amountCents;
-      else if (tx.type === "expense") acc.expenses += Math.abs(tx.amountCents);
-      return acc;
-    },
-    { income: 0, expenses: 0 }
-  );
-
   const selectedAccountName =
     filterAccountId === "all"
       ? t("allAccounts")
       : (accountMap[filterAccountId]?.name ?? t("allAccounts"));
+
+  const hasAnySelected = selectedIds.size > 0;
 
   return (
     <div className="space-y-3">
@@ -155,7 +295,7 @@ export function TransactionsList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("allAccounts")}</SelectItem>
-              {accounts?.map((a: Doc<"fintrack_accounts">) => (
+              {accounts?.map((a: Account) => (
                 <SelectItem key={a._id} value={a._id}>{a.name}</SelectItem>
               ))}
             </SelectContent>
@@ -182,7 +322,7 @@ export function TransactionsList() {
             <SelectContent>
               <SelectItem value="all" className="text-sm">{t("filterCategoryAll")}</SelectItem>
               <SelectItem value="__none__" className="text-sm">— {t("uncategorized")}</SelectItem>
-              {(categories ?? []).map((c: Doc<"fintrack_categories">) => (
+              {(categories ?? []).map((c: Category) => (
                 <SelectItem key={c._id} value={c._id} className="text-sm">
                   {c.icon} {c.name}
                 </SelectItem>
@@ -339,7 +479,7 @@ export function TransactionsList() {
       )}
 
       {/* ── Bulk action toolbar ── */}
-      {selectedIds.size > 0 && (
+      {hasAnySelected && (
         <div
           className="flex flex-wrap items-center gap-3 px-4 py-2.5 rounded-xl border text-xs"
           style={{ backgroundColor: "color-mix(in srgb, var(--color-ft-primary) 8%, var(--color-ft-surface))", borderColor: "var(--color-ft-primary)" }}
@@ -355,12 +495,12 @@ export function TransactionsList() {
             >
               <SelectValue>
                 {bulkCategoryId
-                  ? `${(activeCategories ?? []).find((c: Doc<"fintrack_categories">) => c._id === bulkCategoryId)?.icon ?? ""} ${(activeCategories ?? []).find((c: Doc<"fintrack_categories">) => c._id === bulkCategoryId)?.name ?? ""}`.trim()
+                  ? `${(activeCategories ?? []).find((c: Category) => c._id === bulkCategoryId)?.icon ?? ""} ${(activeCategories ?? []).find((c: Category) => c._id === bulkCategoryId)?.name ?? ""}`.trim()
                   : t("bulkAssignPlaceholder")}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {(activeCategories ?? []).map((c: Doc<"fintrack_categories">) => (
+              {(activeCategories ?? []).map((c: Category) => (
                 <SelectItem key={c._id} value={c._id} className="text-xs">
                   {c.icon} {c.name}
                 </SelectItem>
@@ -457,80 +597,22 @@ export function TransactionsList() {
       {/* ── Transaction list ── */}
       {filtered && filtered.length > 0 && (
         <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: "var(--color-ft-surface)", borderColor: "var(--color-ft-border)" }}>
-          {filtered.map((tx: Transaction, i: number) => {
-            const cat = tx.categoryId ? categoryMap[tx.categoryId] : undefined;
-            const acc = accountMap[tx.accountId];
-            const isExpense = tx.type === "expense";
-            const amountColor = isExpense ? "var(--color-ft-bad)" : tx.type === "transfer" ? "var(--color-ft-primary)" : "var(--color-ft-good)";
-            const displayAmount = isExpense ? -Math.abs(tx.amountCents) : Math.abs(tx.amountCents);
-
-            // Highlight search match in notes
-            const notes = tx.notes ?? (isExpense ? t("expense") : t("income"));
-            const q = search.trim().toLowerCase();
-            const matchIdx = q ? notes.toLowerCase().indexOf(q) : -1;
-
-            const isSelected = selectedIds.has(tx._id);
-            return (
-              <div
-                key={tx._id}
-                className="flex items-center gap-3 px-4 py-3 group"
-                style={{
-                  borderTop: i > 0 ? "1px solid var(--color-ft-border)" : undefined,
-                  backgroundColor: isSelected ? "color-mix(in srgb, var(--color-ft-primary) 6%, transparent)" : undefined,
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={isSelected}
-                  onChange={() => toggleSelect(tx._id)}
-                  className="w-3.5 h-3.5 shrink-0 accent-[var(--color-ft-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ opacity: isSelected || selectedIds.size > 0 ? 1 : undefined }}
-                />
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0" style={{ backgroundColor: "var(--color-ft-surface-2)" }}>
-                  {tx.type === "transfer" ? "↔️" : (cat?.icon ?? "📦")}
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "var(--color-ft-text)" }}>
-                    {matchIdx >= 0 ? (
-                      <>
-                        {notes.slice(0, matchIdx)}
-                        <mark style={{ backgroundColor: "color-mix(in srgb, var(--color-ft-primary) 30%, transparent)", color: "var(--color-ft-text)", borderRadius: "2px", padding: "0 1px" }}>
-                          {notes.slice(matchIdx, matchIdx + q.length)}
-                        </mark>
-                        {notes.slice(matchIdx + q.length)}
-                      </>
-                    ) : notes}
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--color-ft-text-3)" }}>
-                    {tx.type === "transfer"
-                      ? `Transfer · ${acc?.name ?? ""}`
-                      : `${cat?.name ?? t("uncategorized")} · ${acc?.name ?? ""}`}
-                    {" · "}{format(new Date(tx.date), "MMM d, yyyy")}
-                    {tx.source === "csv" && <span className="ml-1 opacity-50">[csv]</span>}
-                  </p>
-                </div>
-
-                <p className="ft-num text-sm font-bold shrink-0" style={{ color: amountColor }}>
-                  {tx.type === "transfer" ? "" : isExpense ? "-" : "+"}
-                  {formatMoney(Math.abs(displayAmount), acc?.currencyCode ?? "USD")}
-                </p>
-
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                  <button onClick={() => setEditTx(tx)} className="p-1 rounded" style={{ color: "var(--color-ft-text-3)" }}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    onClick={async () => { if (confirm(t("confirmDelete"))) await removeMutation({ id: tx._id }); }}
-                    className="p-1 rounded"
-                    style={{ color: "var(--color-ft-bad)" }}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {filtered.map((tx: Transaction, i: number) => (
+            <TransactionRow
+              key={tx._id}
+              tx={tx}
+              i={i}
+              cat={tx.categoryId ? categoryMap[tx.categoryId] : undefined}
+              acc={accountMap[tx.accountId]}
+              searchQuery={debouncedSearch}
+              isSelected={selectedIds.has(tx._id)}
+              hasAnySelected={hasAnySelected}
+              onSelect={toggleSelect}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              t={t}
+            />
+          ))}
         </div>
       )}
 
