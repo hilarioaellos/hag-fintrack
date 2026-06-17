@@ -47,12 +47,21 @@ function NavLink({
       className={cn(
         "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
         active
-          ? "text-[var(--color-ft-primary)]"
+          ? "text-white"
           : "text-[var(--color-ft-text-2)] hover:text-[var(--color-ft-text)]"
       )}
-      style={active ? { backgroundColor: "var(--color-ft-surface-2)" } : undefined}
+      style={
+        active
+          ? { backgroundColor: "#213859" }
+          : undefined
+      }
+      onMouseEnter={active ? undefined : (e) => { (e.currentTarget as HTMLElement).style.backgroundColor = "#162B45"; }}
+      onMouseLeave={active ? undefined : (e) => { (e.currentTarget as HTMLElement).style.backgroundColor = ""; }}
     >
-      <Icon className="h-4 w-4 shrink-0" />
+      <Icon
+        className="h-4 w-4 shrink-0"
+        style={active ? { color: "#4DA3FF" } : undefined}
+      />
       {label}
     </Link>
   );
@@ -81,12 +90,7 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="px-5 py-4 border-b" style={{ borderColor: "var(--color-ft-border)" }}>
-        <span
-          className="ft-num text-lg font-bold tracking-tight"
-          style={{ color: "var(--color-ft-primary)" }}
-        >
-          FinTrack
-        </span>
+        <img src="/logo-fintrack.svg" alt="HAG FinTrack" className="h-8 w-auto" />
       </div>
 
       {/* Main nav */}
@@ -120,6 +124,9 @@ export function Sidebar() {
           <LogOut className="h-4 w-4 shrink-0" />
           Sign Out
         </button>
+        <div className="pt-3 pb-1 flex justify-center">
+          <img src="/logo-hag-partner.svg" alt="Powered by HAG Partner" className="h-4 w-auto opacity-30" />
+        </div>
       </div>
     </aside>
   );

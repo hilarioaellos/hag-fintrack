@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -55,7 +55,7 @@
   --color-ft-text-2:    var(--ft-text-2);
   --color-ft-text-3:    var(--ft-text-3);
 
-  --font-family-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-family-sans: "Inter", system-ui, sans-serif;
   --font-family-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
@@ -134,20 +134,20 @@
     --sidebar-border:          oklch(1 0 0 / 10%);
     --sidebar-ring:            oklch(0.556 0 0);
 
-    /* FT tokens — dark mode (V3 Dark Mode Premium) */
-    --ft-bg:        #080d18;
-    --ft-surface:   #121c30;
-    --ft-surface-2: #18233a;
-    --ft-surface-3: #0e1626;
-    --ft-border:    #1e2d45;
-    --ft-primary:   #38bdf8;
-    --ft-accent:    #22d3ee;
-    --ft-good:      #34d399;
+    /* FT tokens — HAG FinTrack brand */
+    --ft-bg:        #081526;
+    --ft-surface:   #10233A;
+    --ft-surface-2: #162B45;
+    --ft-surface-3: #10233A;
+    --ft-border:    #2A405B;
+    --ft-primary:   #4DA3FF;
+    --ft-accent:    #213859;
+    --ft-good:      #2BB673;
     --ft-warn:      #fbbf24;
-    --ft-bad:       #fb7185;
-    --ft-text:      #e7eef8;
-    --ft-text-2:    #94a3bb;
-    --ft-text-3:    #61708a;
+    --ft-bad:       #D95C5C;
+    --ft-text:      #F0F4FA;
+    --ft-text-2:    #B7BEC7;
+    --ft-text-3:    #687070;
   }
 
   * {

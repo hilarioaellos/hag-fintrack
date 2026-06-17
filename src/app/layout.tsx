@@ -7,8 +7,15 @@ import { I18nProvider } from "@/components/providers/I18nProvider";
 import { getLocale, getMessages } from "next-intl/server";
 
 export const metadata: Metadata = {
-  title: "FinTrack",
-  description: "Personal finance management",
+  title: "HAG FinTrack",
+  description: "HAG FinTrack – Personal Finance",
+  icons: { icon: "/favicon.svg" },
+  openGraph: {
+    title: "HAG FinTrack",
+    description: "HAG FinTrack – Personal Finance",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 export default async function RootLayout({
