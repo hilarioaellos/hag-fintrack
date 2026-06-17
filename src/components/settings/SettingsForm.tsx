@@ -140,10 +140,12 @@ function CatRow({ cat, pending, editState, setEditState, deleteId, setDeleteId, 
             <Pencil className="h-3.5 w-3.5" />
           </button>
         )}
-        <button type="button" onClick={() => setDeleteId(cat._id)}
-          className="p-1 rounded hover:bg-[var(--color-ft-surface)]" style={{ color: "var(--color-ft-text-3)" }}>
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+        {!cat.isSystem && (
+          <button type="button" onClick={() => setDeleteId(cat._id)}
+            className="p-1 rounded hover:bg-[var(--color-ft-surface)]" style={{ color: "var(--color-ft-text-3)" }}>
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
     </div>
   );

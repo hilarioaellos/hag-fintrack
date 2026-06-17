@@ -7,6 +7,7 @@ export function CategorySettingsInit() {
   const settings = useQuery(api.fintrack.user_settings.get);
   const cleanLegacy = useMutation(api.fintrack.categories.cleanLegacySystemCategories);
   const seed = useMutation(api.fintrack.categories.seed);
+  const ensureSystem = useMutation(api.fintrack.categories.ensureSystemCategories);
   const initSettings = useMutation(api.fintrack.categories.initializeSettings);
   const ran = useRef(false);
 
@@ -17,6 +18,7 @@ export function CategorySettingsInit() {
     const alreadyReviewed = settings?.categoriesReviewed === true;
     cleanLegacy()
       .then(() => (alreadyReviewed ? Promise.resolve() : seed()))
+      .then(() => ensureSystem())
       .then(() => initSettings());
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);

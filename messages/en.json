@@ -118,7 +118,12 @@
     "sharedAmountHint": "Amount they owe — a receivable will be created automatically",
     "sharedDebtorRequired": "Enter the name of who owes you",
     "sharedAmountInvalid": "Enter a valid shared amount",
-    "sharedAmountTooLarge": "Their share must be less than the total expense"
+    "sharedAmountTooLarge": "Their share must be less than the total expense",
+    "bulkSelected": "{count} selected",
+    "bulkAssignPlaceholder": "Assign category…",
+    "bulkAssign": "Assign",
+    "bulkAssigning": "Assigning…",
+    "bulkClear": "Clear"
   },
   "budget": {
     "title": "Budget",

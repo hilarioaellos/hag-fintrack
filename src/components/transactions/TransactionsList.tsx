@@ -3,8 +3,8 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/lib/convex";
 import { formatMoney } from "@/lib/money";
 import { useTranslations } from "next-intl";
-import { useState, useMemo } from "react";
-import { Plus, Upload, Trash2, Pencil, Receipt, SlidersHorizontal, X } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Plus, Upload, Trash2, Pencil, Receipt, SlidersHorizontal, X, Tag } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,9 +48,15 @@ export function TransactionsList() {
   const [importOpen, setImportOpen] = useState(false);
   const [editTx, setEditTx] = useState<Transaction | undefined>();
 
+  // ── Bulk selection ────────────────────────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkCategoryId, setBulkCategoryId] = useState("");
+  const [isBulkAssigning, setIsBulkAssigning] = useState(false);
+
   // ── Data ──────────────────────────────────────────────────────────────────
   const accounts = useQuery(api.fintrack.accounts.list);
   const categories = useQuery(api.fintrack.categories.list);
+  const activeCategories = useQuery(api.fintrack.categories.listActive);
 
   const startDate = dateFrom ? new Date(dateFrom + "T00:00:00").getTime() : undefined;
   const endDate   = dateTo   ? new Date(dateTo   + "T23:59:59").getTime() : undefined;
@@ -62,6 +68,7 @@ export function TransactionsList() {
   });
 
   const removeMutation = useMutation(api.fintrack.transactions.remove);
+  const bulkUpdateCategoryMutation = useMutation(api.fintrack.transactions.bulkUpdateCategory);
 
   const categoryMap = Object.fromEntries((categories ?? []).map((c: Doc<"fintrack_categories">) => [c._id, c]));
   const accountMap  = Object.fromEntries((accounts  ?? []).map((a: Doc<"fintrack_accounts">)   => [a._id, a]));
@@ -84,6 +91,34 @@ export function TransactionsList() {
   }, [transactions, search, amountMin, amountMax, filterCategoryId]);
 
   const hasActiveFilters = !!(dateFrom || dateTo || search || amountMin || amountMax || filterCategoryId !== "all");
+
+  // Clear selection when filters or data change
+  useEffect(() => { setSelectedIds(new Set()); }, [filterAccountId, dateFrom, dateTo, search, amountMin, amountMax, filterCategoryId]);
+
+  const filteredIds = useMemo(() => (filtered ?? []).map((tx: Transaction) => tx._id as string), [filtered]);
+  const allSelected = filteredIds.length > 0 && filteredIds.every((id: string) => selectedIds.has(id));
+  const someSelected = !allSelected && filteredIds.some((id: string) => selectedIds.has(id));
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+
+  const toggleSelectAll = () =>
+    setSelectedIds(allSelected ? new Set() : new Set(filteredIds));
+
+  const handleBulkAssign = async () => {
+    if (!bulkCategoryId || selectedIds.size === 0) return;
+    setIsBulkAssigning(true);
+    try {
+      await bulkUpdateCategoryMutation({
+        ids: [...selectedIds] as Doc<"fintrack_transactions">["_id"][],
+        categoryId: bulkCategoryId as Doc<"fintrack_categories">["_id"],
+      });
+      setSelectedIds(new Set());
+      setBulkCategoryId("");
+    } finally {
+      setIsBulkAssigning(false);
+    }
+  };
 
   const clearFilters = () => {
     setDateFrom(""); setDateTo("");
@@ -303,19 +338,75 @@ export function TransactionsList() {
         </div>
       )}
 
+      {/* ── Bulk action toolbar ── */}
+      {selectedIds.size > 0 && (
+        <div
+          className="flex flex-wrap items-center gap-3 px-4 py-2.5 rounded-xl border text-xs"
+          style={{ backgroundColor: "color-mix(in srgb, var(--color-ft-primary) 8%, var(--color-ft-surface))", borderColor: "var(--color-ft-primary)" }}
+        >
+          <Tag className="h-3.5 w-3.5 shrink-0" style={{ color: "var(--color-ft-primary)" }} />
+          <span className="font-semibold" style={{ color: "var(--color-ft-primary)" }}>
+            {t("bulkSelected", { count: selectedIds.size })}
+          </span>
+          <Select value={bulkCategoryId} onValueChange={(v) => { if (v) setBulkCategoryId(v); }}>
+            <SelectTrigger
+              className="h-7 text-xs w-[180px]"
+              style={{ backgroundColor: "var(--color-ft-surface-2)", borderColor: "var(--color-ft-border)", color: "var(--color-ft-text)" }}
+            >
+              <SelectValue>
+                {bulkCategoryId
+                  ? `${(activeCategories ?? []).find((c: Doc<"fintrack_categories">) => c._id === bulkCategoryId)?.icon ?? ""} ${(activeCategories ?? []).find((c: Doc<"fintrack_categories">) => c._id === bulkCategoryId)?.name ?? ""}`.trim()
+                  : t("bulkAssignPlaceholder")}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {(activeCategories ?? []).map((c: Doc<"fintrack_categories">) => (
+                <SelectItem key={c._id} value={c._id} className="text-xs">
+                  {c.icon} {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button
+            size="sm"
+            disabled={!bulkCategoryId || isBulkAssigning}
+            onClick={handleBulkAssign}
+            style={{ backgroundColor: "var(--color-ft-primary)", color: "#080d18", height: "1.75rem", fontSize: "0.75rem" }}
+          >
+            {isBulkAssigning ? t("bulkAssigning") : t("bulkAssign")}
+          </Button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="flex items-center gap-1 ml-auto"
+            style={{ color: "var(--color-ft-text-3)" }}
+          >
+            <X className="h-3 w-3" /> {t("bulkClear")}
+          </button>
+        </div>
+      )}
+
       {/* ── Summary bar ── */}
       {filtered && filtered.length > 0 && (
         <div
           className="flex flex-wrap gap-4 px-4 py-2.5 rounded-xl text-xs"
           style={{ backgroundColor: "var(--color-ft-surface)" }}
         >
-          <span style={{ color: "var(--color-ft-text-3)" }}>
-            {filtered.length}
-            {transactions && filtered.length !== transactions.length && (
-              <span> {t("of")} {transactions.length}</span>
-            )}
-            {" "}{t("transactionsCount")}
-          </span>
+          <label className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              ref={(el) => { if (el) el.indeterminate = someSelected; }}
+              onChange={toggleSelectAll}
+              className="w-3.5 h-3.5 accent-[var(--color-ft-primary)]"
+            />
+            <span style={{ color: "var(--color-ft-text-3)" }}>
+              {filtered.length}
+              {transactions && filtered.length !== transactions.length && (
+                <span> {t("of")} {transactions.length}</span>
+              )}
+              {" "}{t("transactionsCount")}
+            </span>
+          </label>
           <span style={{ color: "var(--color-ft-good)" }}>+{formatMoney(totals.income)}</span>
           <span style={{ color: "var(--color-ft-bad)" }}>-{formatMoney(totals.expenses)}</span>
           <span style={{ color: totals.income - totals.expenses >= 0 ? "var(--color-ft-good)" : "var(--color-ft-bad)", fontWeight: 600 }}>
@@ -378,12 +469,23 @@ export function TransactionsList() {
             const q = search.trim().toLowerCase();
             const matchIdx = q ? notes.toLowerCase().indexOf(q) : -1;
 
+            const isSelected = selectedIds.has(tx._id);
             return (
               <div
                 key={tx._id}
                 className="flex items-center gap-3 px-4 py-3 group"
-                style={{ borderTop: i > 0 ? "1px solid var(--color-ft-border)" : undefined }}
+                style={{
+                  borderTop: i > 0 ? "1px solid var(--color-ft-border)" : undefined,
+                  backgroundColor: isSelected ? "color-mix(in srgb, var(--color-ft-primary) 6%, transparent)" : undefined,
+                }}
               >
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleSelect(tx._id)}
+                  className="w-3.5 h-3.5 shrink-0 accent-[var(--color-ft-primary)] opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ opacity: isSelected || selectedIds.size > 0 ? 1 : undefined }}
+                />
                 <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0" style={{ backgroundColor: "var(--color-ft-surface-2)" }}>
                   {tx.type === "transfer" ? "↔️" : (cat?.icon ?? "📦")}
                 </div>
