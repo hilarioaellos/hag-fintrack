@@ -88,9 +88,12 @@ export function Sidebar() {
         borderColor: "var(--color-ft-border)",
       }}
     >
-      {/* Logo */}
-      <div className="px-5 py-4 border-b" style={{ borderColor: "var(--color-ft-border)" }}>
-        <img src="/logo-fintrack.svg" alt="HAG FinTrack" className="h-8 w-auto" />
+      {/* Logo — h-14 matches Topbar height */}
+      <div className="h-14 px-5 flex items-center border-b shrink-0" style={{ borderColor: "var(--color-ft-border)" }}>
+        {/* Dark mode: white logo */}
+        <img src="/logo-fintrack.svg" alt="HAG FinTrack" className="h-10 w-auto hidden dark:block" />
+        {/* Light mode: color logo */}
+        <img src="/logo-fintrack-color.svg" alt="HAG FinTrack" className="h-10 w-auto block dark:hidden" />
       </div>
 
       {/* Main nav */}
