@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useTranslations } from "next-intl";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -71,6 +72,8 @@ export function Sidebar() {
   const pathname = usePathname();
   const { signOut } = useAuthActions();
   const t = useTranslations("nav");
+  const { resolvedTheme } = useTheme();
+  const logoSrc = resolvedTheme === "dark" ? "/logo-fintrack.svg" : "/logo-fintrack-color.svg";
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
@@ -90,10 +93,7 @@ export function Sidebar() {
     >
       {/* Logo — h-14 matches Topbar height */}
       <div className="h-14 px-5 flex items-center border-b shrink-0" style={{ borderColor: "var(--color-ft-border)" }}>
-        {/* Dark mode: white logo */}
-        <img src="/logo-fintrack.svg" alt="HAG FinTrack" className="h-10 w-auto hidden dark:block" />
-        {/* Light mode: color logo */}
-        <img src="/logo-fintrack-color.svg" alt="HAG FinTrack" className="h-10 w-auto block dark:hidden" />
+        <img src={logoSrc} alt="HAG FinTrack" className="h-10 w-auto" />
       </div>
 
       {/* Main nav */}
