@@ -73,7 +73,7 @@ export function Sidebar() {
   const { signOut } = useAuthActions();
   const t = useTranslations("nav");
   const { resolvedTheme } = useTheme();
-  const logoSrc = resolvedTheme === "dark" ? "/logo-fintrack.svg" : "/logo-fintrack-color.svg";
+  const logoSrc = resolvedTheme === "light" ? "/logo-fintrack-color.svg" : "/logo-fintrack.svg";
 
   const isActive = (href: string) =>
     pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
